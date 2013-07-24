@@ -188,7 +188,7 @@ public class PutMeasuresTask extends AsyncTask<Integer, Integer, Integer> {
 			sensor = DatabaseRequest.SensorRQ.getSensor(context, sensorName);
 
 			try {
-				if (!RestRequest.isSensorRegistred(sensor)) {
+				if (!RestRequest.isSensorRegistered(sensor)) {
 					Uri postSensorResult = null;
 					try {
 						postSensorResult = new PostSensorRestTask(context, sensorName).executeOnExecutor(THREAD_POOL_EXECUTOR).get();

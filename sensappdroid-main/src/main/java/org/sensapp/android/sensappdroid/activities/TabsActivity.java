@@ -3,6 +3,7 @@ package org.sensapp.android.sensappdroid.activities;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -14,6 +15,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
+import org.java_websocket.drafts.Draft_17;
 import org.sensapp.android.sensappdroid.R;
 import org.sensapp.android.sensappdroid.contract.SensAppContract;
 import org.sensapp.android.sensappdroid.fragments.CompositeListFragment;
@@ -24,12 +26,16 @@ import org.sensapp.android.sensappdroid.fragments.MeasureListFragment;
 import org.sensapp.android.sensappdroid.fragments.MeasureListFragment.OnMeasureSelectedListener;
 import org.sensapp.android.sensappdroid.fragments.SensorListFragment;
 import org.sensapp.android.sensappdroid.fragments.SensorListFragment.OnSensorSelectedListener;
+import org.sensapp.android.sensappdroid.preferences.GeneralPrefFragment;
+import org.sensapp.android.sensappdroid.websocket.WsClient;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
 public class TabsActivity extends FragmentActivity implements OnCompositeSelectedListener, OnSensorSelectedListener, OnMeasureSelectedListener, OnGraphSelectedListener{
 
+    static private WsClient mClient = null;
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
     private PagerTitleStrip mPagerTitle;
@@ -56,7 +62,11 @@ public class TabsActivity extends FragmentActivity implements OnCompositeSelecte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        // Create the adapter that will return a fragment for each of the three
+        String serverUrl = GeneralPrefFragment.buildUri(PreferenceManager.getDefaultSharedPreferences(this), getResources());
+        if(serverUrl.contains("ws://"))
+            mClient = new WsClient(URI.create(serverUrl), new Draft_17());
+
+        // Create the adapter that will return a fragment for each of the
         // primary sections of the app.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
@@ -210,5 +220,7 @@ public class TabsActivity extends FragmentActivity implements OnCompositeSelecte
         startActivity(i);
     }
 
-
+     static public WsClient getClient(){
+         return mClient;
+     }
 }

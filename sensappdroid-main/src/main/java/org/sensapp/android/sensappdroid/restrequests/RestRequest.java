@@ -39,7 +39,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.Charset;
 
-public final class RestRequest {
+public final class RestRequest{
 	
 	public static final String SENSOR_PATH = "/sensapp/registry/sensors";
 	public static final String COMPOSITE_PATH = "/sensapp/registry/composite/sensors";
@@ -49,7 +49,7 @@ public final class RestRequest {
 	
 	private RestRequest() {}
 	
-	public static boolean isSensorRegistred(Sensor sensor) throws RequestErrorException {
+	public static boolean isSensorRegistered(Sensor sensor) throws RequestErrorException {
 		URI target;
 		try {
 			target = new URI(sensor.getUri().toString() + SENSOR_PATH + "/" + sensor.getName());
@@ -141,7 +141,7 @@ public final class RestRequest {
 		return response; 
 	}
 	
-	public static boolean isCompositeRegistred(Composite composite) throws RequestErrorException {
+	public static boolean isCompositeRegistered(Composite composite) throws RequestErrorException {
 		URI target;
 		try {
 			target = new URI(composite.getUri().toString() + COMPOSITE_PATH + "/" + composite.getName());

@@ -73,7 +73,7 @@ public class PostCompositeRestTask extends AsyncTask<Void, Void, Uri> {
 			}
 			sensor = DatabaseRequest.SensorRQ.getSensor(context, uri.getLastPathSegment());
 			try {
-				if (!RestRequest.isSensorRegistred(sensor)) {
+				if (!RestRequest.isSensorRegistered(sensor)) {
 					Uri postSensorResult = null;
 					try {
 						postSensorResult = new PostSensorRestTask(context, sensor.getName()).executeOnExecutor(THREAD_POOL_EXECUTOR).get();
