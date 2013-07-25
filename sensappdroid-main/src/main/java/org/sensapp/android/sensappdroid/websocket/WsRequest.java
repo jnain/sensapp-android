@@ -31,7 +31,6 @@ public class WsRequest{
     private static List<String> messages = wsClient.getMessageList();
 
     static public boolean isSensorRegistered(Sensor sensor){
-        Log.d("coucou", "ici");
         assureClientIsConnected();
         wsClient.send("getRawSensor("+sensor.getName()+")");
         return !waitAndReturnResponse(sensor.getName()).equals("none");
@@ -178,10 +177,11 @@ public class WsRequest{
 
     static private void assureClientIsConnected(){
         if(!wsClient.getConnected()){
-            Log.d("coucou", "reco");
-            wsClient.close();
+            TabsActivity.resetClient();
+            wsClient = TabsActivity.getClient();
             wsClient.connect();
         }
+        while(!wsClient.getConnected());
     }
 
     static private String waitAndReturnResponse(String request){

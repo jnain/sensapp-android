@@ -42,7 +42,7 @@ public class GeneralPrefFragment extends PreferenceFragment {
             if(url.contains("ws://")){
                 if(TabsActivity.getClient().getConnected())
                     TabsActivity.getClient().close();
-                TabsActivity.setClient(buildUri(sharedPreferences, getResources()));
+                TabsActivity.resetClient();
                 TabsActivity.getClient().connect();
             } else if (TabsActivity.getClient().getConnected())
                 TabsActivity.getClient().close();

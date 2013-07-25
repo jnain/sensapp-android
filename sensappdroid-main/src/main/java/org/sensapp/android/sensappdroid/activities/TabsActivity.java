@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TabsActivity extends FragmentActivity implements OnCompositeSelectedListener, OnSensorSelectedListener, OnMeasureSelectedListener, OnGraphSelectedListener{
-
+    static public String ServerURL = null;
     static private WsClient mClient = new WsClient(URI.create("noUrl:9000"), new Draft_17());
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
@@ -67,6 +67,7 @@ public class TabsActivity extends FragmentActivity implements OnCompositeSelecte
             mClient = new WsClient(URI.create(serverUrl), new Draft_17());
             mClient.connect();
         }
+        ServerURL = serverUrl;
         // Create the adapter that will return a fragment for each of the
         // primary sections of the app.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -225,7 +226,7 @@ public class TabsActivity extends FragmentActivity implements OnCompositeSelecte
      return mClient;
     }
 
-    static public void setClient(String url){
-        mClient = new WsClient(URI.create(url), new Draft_17());
+    static public void resetClient(){
+        mClient = new WsClient(URI.create(ServerURL), new Draft_17());
     }
 }
