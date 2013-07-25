@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TabsActivity extends FragmentActivity implements OnCompositeSelectedListener, OnSensorSelectedListener, OnMeasureSelectedListener, OnGraphSelectedListener{
-    static public String ServerURL = null;
+    static public String ServerURL = "";
     static private WsClient mClient = new WsClient(URI.create("noUrl:9000"), new Draft_17());
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;

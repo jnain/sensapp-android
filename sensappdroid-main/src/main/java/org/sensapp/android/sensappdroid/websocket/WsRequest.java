@@ -19,6 +19,7 @@ import org.sensapp.android.sensappdroid.preferences.GeneralPrefFragment;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -28,24 +29,27 @@ import java.util.List;
  */
 public class WsRequest{
     static private WsClient wsClient = TabsActivity.getClient();
-    private static List<String> messages = wsClient.getMessageList();
+    private static Map<String, String> messages = wsClient.getMessageList();
 
     static public boolean isSensorRegistered(Sensor sensor){
         assureClientIsConnected();
-        wsClient.send("getRawSensor("+sensor.getName()+")");
-        return !waitAndReturnResponse(sensor.getName()).equals("none");
+        String request = "getRawSensor("+sensor.getName()+")";
+        wsClient.send(request);
+        return !waitAndReturnResponse(request).equals("none");
     }
 
     static public String postSensor(Sensor sensor){
         assureClientIsConnected();
-        wsClient.send("registerRawSensor("+JsonPrinter.sensorToJson(sensor)+")");
-        return waitAndReturnResponse(sensor.getName());
+        String request = "registerRawSensor("+JsonPrinter.sensorToJson(sensor)+")";
+        wsClient.send(request);
+        return waitAndReturnResponse(request);
     }
 
     static public String deleteSensor(Sensor sensor){
         assureClientIsConnected();
-        wsClient.send("deleteRawSensor("+ sensor.getName() +")");
-        return waitAndReturnResponse("true");
+        String request = "deleteRawSensor("+ sensor.getName() +")";
+        wsClient.send(request);
+        return waitAndReturnResponse(request);
     }
 
     public static final int FLAG_DEFAULT = 0x79;
@@ -158,21 +162,23 @@ public class WsRequest{
                 }
             }
         }
-        return waitAndReturnResponse(JsonPrinter.measuresToJson(model));
+        return waitAndReturnResponse("registerData("+ JsonPrinter.measuresToJson(model) +")");
     }
 
     static public boolean isCompositeRegistered(Context context, String compositeName){
         Composite composite = DatabaseRequest.CompositeRQ.getComposite(context, compositeName);
         assureClientIsConnected();
-        wsClient.send("getComposite(" + composite.getName() + ")");
-        return !waitAndReturnResponse(composite.getName()).equals("none");
+        String request = "getComposite(" + composite.getName() + ")";
+        wsClient.send(request);
+        return !waitAndReturnResponse(request).equals("none");
     }
 
     static public String postComposite(Context context, String compositeName){
         Composite composite = DatabaseRequest.CompositeRQ.getComposite(context, compositeName);
         assureClientIsConnected();
-        wsClient.send("registerComposite(" + JsonPrinter.compositeToJson(composite) + ")");
-        return waitAndReturnResponse(composite.getName());
+        String request = "registerComposite(" + JsonPrinter.compositeToJson(composite) + ")";
+        wsClient.send(request);
+        return waitAndReturnResponse(request);
     }
 
     static private void assureClientIsConnected(){
@@ -194,12 +200,24 @@ public class WsRequest{
     }
 
     static private String getResponse(String request){
-        for(String message: messages){
-            if(message.contains(request)){
-                messages.remove(message);
-                return message;
-            }
+        return getResponse(request, 0);
+    }
+
+    static private String getResponse(String request, int times){
+        String response = messages.get(request);
+        if(response!=null) {
+            Log.d("coucou", request + " -> " + response);
+            return response;
         }
+        if(times != 50){
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            return getResponse(request, times+1);
+        }
+        Log.d("coucou", request + " -> " + "none");
         return "none";
     }
 

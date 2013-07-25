@@ -6,8 +6,8 @@ import org.java_websocket.drafts.Draft;
 import org.java_websocket.handshake.ServerHandshake;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Hashtable;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -17,7 +17,7 @@ import java.util.List;
  */
 public class WsClient extends WebSocketClient {
     private boolean connected = false;
-    private List<String> receivedMessages = new ArrayList<String>();
+    private Map<String, String> receivedMessages = new Hashtable<String, String>();
 
     public WsClient( URI serverUri , Draft draft ) {
         super( serverUri, draft );
@@ -32,9 +32,10 @@ public class WsClient extends WebSocketClient {
 
     @Override
     public void onMessage( String message ) {
-        Log.d("coucou", "received: " + message);
+        //Log.d("coucou", "received: " + message);
         // send( "you said: " + message );
-        receivedMessages.add(message);
+        String split[] = message.split(", ");
+        receivedMessages.put(split[0], split[1]);
     }
 
     @Override
@@ -54,7 +55,7 @@ public class WsClient extends WebSocketClient {
         return connected;
     }
 
-    public List<String> getMessageList(){
+    public Map<String, String> getMessageList(){
         return receivedMessages;
     }
 }
