@@ -51,15 +51,16 @@ public class EditTextServerPreference extends EditTextPreference {
 			String address = this.getText();
 			boolean valid = true;
 			String errorMsg = "";
-			if (!Patterns.WEB_URL.matcher(address).matches()) {
+			if (!Patterns.WEB_URL.matcher(address).matches()
+                    && !Patterns.WEB_URL.matcher(address.substring(address.indexOf("ws://")+5)).matches()) {
 				valid = false;
 				errorMsg += "The server url is not a valid web address. Check for unexpected spaces or characters.";
-			} else if (!URLUtil.isValidUrl(address)) {
+			} else if (!URLUtil.isValidUrl(address) && !address.contains("ws://")) {
 				address = "http://".concat(address);
-			} else if (!URLUtil.isHttpUrl(address)) {
+			}/* else if (!URLUtil.isHttpUrl(address)) {
 				valid = false;
 				errorMsg += "The server url is not a HTTP one. At this time only this protocol is supported.";
-			}
+			} */
 			if (!valid) {
 				AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
 				builder.setMessage(errorMsg)

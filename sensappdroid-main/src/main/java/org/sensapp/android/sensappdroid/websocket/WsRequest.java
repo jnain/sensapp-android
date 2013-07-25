@@ -16,8 +16,6 @@ import org.sensapp.android.sensappdroid.json.StringMeasureJsonModel;
 import org.sensapp.android.sensappdroid.models.Composite;
 import org.sensapp.android.sensappdroid.models.Sensor;
 import org.sensapp.android.sensappdroid.preferences.GeneralPrefFragment;
-import org.sensapp.android.sensappdroid.restrequests.RequestErrorException;
-import org.sensapp.android.sensappdroid.restrequests.RestRequest;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,20 +31,21 @@ public class WsRequest{
     private static List<String> messages = wsClient.getMessageList();
 
     static public boolean isSensorRegistered(Sensor sensor){
+        Log.d("coucou", "ici");
         assureClientIsConnected();
-        wsClient.send("getSensor("+sensor.getName()+")");
+        wsClient.send("getRawSensor("+sensor.getName()+")");
         return !waitAndReturnResponse(sensor.getName()).equals("none");
     }
 
     static public String postSensor(Sensor sensor){
         assureClientIsConnected();
-        wsClient.send("registerSensor("+JsonPrinter.sensorToJson(sensor)+")");
+        wsClient.send("registerRawSensor("+JsonPrinter.sensorToJson(sensor)+")");
         return waitAndReturnResponse(sensor.getName());
     }
 
     static public String deleteSensor(Sensor sensor){
         assureClientIsConnected();
-        wsClient.send("deleteSensor("+ sensor.getName() +")");
+        wsClient.send("deleteRawSensor("+ sensor.getName() +")");
         return waitAndReturnResponse("true");
     }
 
@@ -104,15 +103,9 @@ public class WsRequest{
 
             sensor = DatabaseRequest.SensorRQ.getSensor(context, sensorName);
 
-            try {
-                if (!RestRequest.isSensorRegistered(sensor)) {
-                    postSensor(sensor);
-                }
-            } catch (RequestErrorException e1) {
-                Log.e(TAG, e1.getMessage());
-                return null;
+            if (!WsRequest.isSensorRegistered(sensor)) {
+                postSensor(sensor);
             }
-
 
             if ("Numerical".equals(sensor.getTemplate())) {
                 model = new NumericalMeasureJsonModel(sensorName, sensor.getUnit());
@@ -169,21 +162,26 @@ public class WsRequest{
         return waitAndReturnResponse(JsonPrinter.measuresToJson(model));
     }
 
-    static public boolean isCompositeRegistered(Composite composite){
+    static public boolean isCompositeRegistered(Context context, String compositeName){
+        Composite composite = DatabaseRequest.CompositeRQ.getComposite(context, compositeName);
         assureClientIsConnected();
         wsClient.send("getComposite(" + composite.getName() + ")");
         return !waitAndReturnResponse(composite.getName()).equals("none");
     }
 
-    static public String postComposite(Composite composite){
+    static public String postComposite(Context context, String compositeName){
+        Composite composite = DatabaseRequest.CompositeRQ.getComposite(context, compositeName);
         assureClientIsConnected();
         wsClient.send("registerComposite(" + JsonPrinter.compositeToJson(composite) + ")");
         return waitAndReturnResponse(composite.getName());
     }
 
     static private void assureClientIsConnected(){
-        if(!wsClient.getConnected())
+        if(!wsClient.getConnected()){
+            Log.d("coucou", "reco");
+            wsClient.close();
             wsClient.connect();
+        }
     }
 
     static private String waitAndReturnResponse(String request){

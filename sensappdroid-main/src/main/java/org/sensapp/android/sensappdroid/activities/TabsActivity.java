@@ -35,7 +35,7 @@ import java.util.List;
 
 public class TabsActivity extends FragmentActivity implements OnCompositeSelectedListener, OnSensorSelectedListener, OnMeasureSelectedListener, OnGraphSelectedListener{
 
-    static private WsClient mClient = null;
+    static private WsClient mClient = new WsClient(URI.create("noUrl:9000"), new Draft_17());
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
     private PagerTitleStrip mPagerTitle;
@@ -63,9 +63,10 @@ public class TabsActivity extends FragmentActivity implements OnCompositeSelecte
         setContentView(R.layout.activity_main);
 
         String serverUrl = GeneralPrefFragment.buildUri(PreferenceManager.getDefaultSharedPreferences(this), getResources());
-        if(serverUrl.contains("ws://"))
+        if(serverUrl.contains("ws://")){
             mClient = new WsClient(URI.create(serverUrl), new Draft_17());
-
+            mClient.connect();
+        }
         // Create the adapter that will return a fragment for each of the
         // primary sections of the app.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -220,7 +221,11 @@ public class TabsActivity extends FragmentActivity implements OnCompositeSelecte
         startActivity(i);
     }
 
-     static public WsClient getClient(){
-         return mClient;
-     }
+    static public WsClient getClient(){
+     return mClient;
+    }
+
+    static public void setClient(String url){
+        mClient = new WsClient(URI.create(url), new Draft_17());
+    }
 }

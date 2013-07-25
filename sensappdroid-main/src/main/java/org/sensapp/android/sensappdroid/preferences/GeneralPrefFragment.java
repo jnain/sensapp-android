@@ -15,14 +15,14 @@
  */
 package org.sensapp.android.sensappdroid.preferences;
 
-import org.sensapp.android.sensappdroid.R;
-
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.preference.EditTextPreference;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
+import org.sensapp.android.sensappdroid.R;
+import org.sensapp.android.sensappdroid.activities.TabsActivity;
 
 public class GeneralPrefFragment extends PreferenceFragment {
 	
@@ -37,7 +37,15 @@ public class GeneralPrefFragment extends PreferenceFragment {
 				server.setSummary(sharedPreferences.getString(server.getKey(), ""));
 			} else if (key.equals(port.getKey())) {
 				port.setSummary(sharedPreferences.getString(port.getKey(), ""));
-			} 			
+			}
+            String url = sharedPreferences.getString(server.getKey(), "");
+            if(url.contains("ws://")){
+                if(TabsActivity.getClient().getConnected())
+                    TabsActivity.getClient().close();
+                TabsActivity.setClient(buildUri(sharedPreferences, getResources()));
+                TabsActivity.getClient().connect();
+            } else if (TabsActivity.getClient().getConnected())
+                TabsActivity.getClient().close();
 		}
 	};
 	

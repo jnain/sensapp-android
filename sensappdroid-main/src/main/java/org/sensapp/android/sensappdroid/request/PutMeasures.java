@@ -17,10 +17,10 @@ import org.sensapp.android.sensappdroid.websocket.WsRequest;
 public class PutMeasures {
     public PutMeasures(SharedPreferences sharedPreferences, Resources resources, Context context, Uri data){
         if(GeneralPrefFragment.buildUri(sharedPreferences, resources).contains("ws://")){
-            WsRequest.putData();
+            WsRequest.putData(context, data);
         }
         else{
-            new PutMeasuresTask(context, data);
+            new PutMeasuresTask(context, data).execute();
         }
     }
 }

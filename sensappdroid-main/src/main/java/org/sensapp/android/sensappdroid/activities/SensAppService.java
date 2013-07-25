@@ -30,8 +30,8 @@ import org.sensapp.android.sensappdroid.connectivity.ConnectivityReceiver;
 import org.sensapp.android.sensappdroid.contract.SensAppContract;
 import org.sensapp.android.sensappdroid.datarequests.DeleteMeasuresTask;
 import org.sensapp.android.sensappdroid.preferences.AutoUploadSensorDialog;
-import org.sensapp.android.sensappdroid.restrequests.PostCompositeRestTask;
-import org.sensapp.android.sensappdroid.restrequests.PutMeasuresTask;
+import org.sensapp.android.sensappdroid.request.PostComposite;
+import org.sensapp.android.sensappdroid.request.PutMeasures;
 import org.sensapp.android.sensappdroid.restrequests.PutMeasuresTask.PutMeasureCallback;
 
 import java.util.ArrayList;
@@ -101,8 +101,10 @@ public class SensAppService extends Service implements PutMeasureCallback {
 			Log.e(TAG, "No data connection available");
 			Toast.makeText(this, "No data connection available", Toast.LENGTH_LONG).show();
 		} else {
-			new PutMeasuresTask(this, taskIdGen(), getApplicationContext(), uri).execute();
-		}
+			//new PutMeasuresTask(this, taskIdGen(), getApplicationContext(), uri).execute();
+		    new PutMeasures(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()),
+                    getResources(), getApplicationContext(), uri);
+        }
 	}
 	
 	private void autoUpload() {
@@ -114,7 +116,9 @@ public class SensAppService extends Service implements PutMeasureCallback {
             Set<String> names = PreferenceManager.getDefaultSharedPreferences(this).getStringSet(AutoUploadSensorDialog.SENSOR_MAINTAINED, null);
             if (names != null && !names.isEmpty()) {
                 for (final String name : names) {
-                    new PutMeasuresTask(this, taskIdGen(), getApplicationContext(), Uri.parse(SensAppContract.Measure.CONTENT_URI + "/" + name), PutMeasuresTask.FLAG_SILENT).execute();
+                    //new PutMeasuresTask(this, taskIdGen(), getApplicationContext(), Uri.parse(SensAppContract.Measure.CONTENT_URI + "/" + name), PutMeasuresTask.FLAG_SILENT).execute();
+                    new PutMeasures(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()),
+                            getResources(), getApplicationContext(), Uri.parse(SensAppContract.Measure.CONTENT_URI + "/" + name));
                 }
             }
         }
@@ -139,10 +143,13 @@ public class SensAppService extends Service implements PutMeasureCallback {
                     compositeNames[i] = composites.getString(composites.getColumnIndex(SensAppContract.Composite.NAME));
                     composites.moveToNext();
                 }
-                new PutMeasuresTask(this, taskIdGen(), getApplicationContext(), SensAppContract.Measure.CONTENT_URI, PutMeasuresTask.FLAG_SILENT).execute();
+                //new PutMeasuresTask(this, taskIdGen(), getApplicationContext(), SensAppContract.Measure.CONTENT_URI, PutMeasuresTask.FLAG_SILENT).execute();
+                new PutMeasures(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()),
+                        getResources(), getApplicationContext(), SensAppContract.Measure.CONTENT_URI);
                 new DeleteMeasuresTask(this, SensAppContract.Measure.CONTENT_URI).execute(SensAppContract.Measure.UPLOADED + " = 1");
                 for(String name : compositeNames)
-                    new PostCompositeRestTask(this, name).execute();
+                    new PostComposite(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()),
+                            getResources(), this, name);
             }
             if(cursor.getCount() < amountData)
                 dataSent = false;
