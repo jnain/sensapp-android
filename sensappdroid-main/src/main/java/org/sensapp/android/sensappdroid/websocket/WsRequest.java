@@ -184,7 +184,7 @@ public class WsRequest{
         return waitAndReturnResponse(request);
     }
 
-    static private void assureClientIsConnected(){
+    static public void assureClientIsConnected(){
         if(!wsClient.getConnected()){
             TabsActivity.resetClient();
             wsClient = TabsActivity.getClient();
@@ -193,7 +193,7 @@ public class WsRequest{
         while(!wsClient.getConnected());
     }
 
-    static private String waitAndReturnResponse(String request){
+    static public String waitAndReturnResponse(String request){
         return getResponse(request);
     }
 

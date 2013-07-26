@@ -84,7 +84,7 @@ public final class JsonPrinter {
 		for (Uri uri : composite.getSensors()) {
 			sensors.add(uri.toString());
 		}
-		ComposititeJsonModel jsonComposite = new ComposititeJsonModel(composite.getName(), composite.getDescription(), sensors);
+		CompositeJsonModel jsonComposite = new CompositeJsonModel(composite.getName(), composite.getDescription(), sensors);
 		try {
 			jsonString = mapper.writeValueAsString(jsonComposite);
 		} catch (JsonGenerationException e) {

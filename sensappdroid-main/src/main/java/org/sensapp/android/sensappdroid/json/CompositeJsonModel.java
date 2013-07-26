@@ -17,13 +17,13 @@ package org.sensapp.android.sensappdroid.json;
 
 import java.util.List;
 
-public class ComposititeJsonModel {
+public class CompositeJsonModel {
 	
 	private String id;
 	private String descr;
 	private List<String> sensors;
 	
-	public ComposititeJsonModel(String id, String descr, List<String> sensors) {
+	public CompositeJsonModel(String id, String descr, List<String> sensors) {
 		this.id = id;
 		this.descr = descr;
 		this.sensors = sensors;

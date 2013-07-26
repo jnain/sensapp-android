@@ -18,13 +18,10 @@ import android.widget.TextView;
 import org.java_websocket.drafts.Draft_17;
 import org.sensapp.android.sensappdroid.R;
 import org.sensapp.android.sensappdroid.contract.SensAppContract;
-import org.sensapp.android.sensappdroid.fragments.CompositeListFragment;
+import org.sensapp.android.sensappdroid.fragments.*;
 import org.sensapp.android.sensappdroid.fragments.CompositeListFragment.OnCompositeSelectedListener;
-import org.sensapp.android.sensappdroid.fragments.GraphsListFragment;
 import org.sensapp.android.sensappdroid.fragments.GraphsListFragment.OnGraphSelectedListener;
-import org.sensapp.android.sensappdroid.fragments.MeasureListFragment;
 import org.sensapp.android.sensappdroid.fragments.MeasureListFragment.OnMeasureSelectedListener;
-import org.sensapp.android.sensappdroid.fragments.SensorListFragment;
 import org.sensapp.android.sensappdroid.fragments.SensorListFragment.OnSensorSelectedListener;
 import org.sensapp.android.sensappdroid.preferences.GeneralPrefFragment;
 import org.sensapp.android.sensappdroid.websocket.WsClient;
@@ -39,23 +36,26 @@ public class TabsActivity extends FragmentActivity implements OnCompositeSelecte
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private ViewPager mViewPager;
     private PagerTitleStrip mPagerTitle;
-    final static int NB_FRAGMENTS = 4;
+    final static int NB_FRAGMENTS = 5;
     final static List<Fragment> fragmentList = new ArrayList<Fragment>(){{
         add(new CompositeListFragment());
         add(new SensorListFragment());
         add(new GraphsListFragment());
         add(new MeasureListFragment());
+        add(new ServerDataFragment());
     }};
     final static List<String> fragmentNames = new ArrayList<String>(){{
         add("Composites");
         add("Sensors");
         add("Graphs");
         add("Measures");
+        add("Server Data");
     }};
     final static int COMPOSITES = 0;
     final static int SENSORS = 1;
     final static int GRAPHS = 2;
     final static int MEASURES = 3;
+    final static int DATA = 4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -156,20 +156,7 @@ public class TabsActivity extends FragmentActivity implements OnCompositeSelecte
 
         @Override
         public Fragment getItem(int position) {
-            Fragment fragment = new Fragment();
-            switch (position) {
-                case COMPOSITES:
-                    return fragmentList.get(COMPOSITES);
-                case SENSORS:
-                    return fragmentList.get(SENSORS);
-                case GRAPHS:
-                    return fragmentList.get(GRAPHS);
-                case MEASURES:
-                    return fragmentList.get(MEASURES);
-                default:
-                    break;
-            }
-            return fragment;
+            return fragmentList.get(position);
         }
 
         @Override
@@ -179,17 +166,7 @@ public class TabsActivity extends FragmentActivity implements OnCompositeSelecte
 
         @Override
         public CharSequence getPageTitle(int position) {
-            switch (position) {
-                case COMPOSITES:
-                    return fragmentNames.get(COMPOSITES);
-                case SENSORS:
-                    return fragmentNames.get(SENSORS);
-                case GRAPHS:
-                    return fragmentNames.get(GRAPHS);
-                case MEASURES:
-                    return fragmentNames.get(MEASURES);
-            }
-            return null;
+            return fragmentNames.get(position);
         }
     }
 
