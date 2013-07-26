@@ -35,21 +35,21 @@ public class WsRequest{
 
     static public boolean isSensorRegistered(Sensor sensor){
         assureClientIsConnected();
-        String request = "getRawSensor("+sensor.getName()+")";
+        String request = "getSensor("+sensor.getName()+")";
         wsClient.send(request);
         return !waitAndReturnResponse(request).equals("none");
     }
 
     static public String postSensor(Sensor sensor){
         assureClientIsConnected();
-        String request = "registerRawSensor("+JsonPrinter.sensorToJson(sensor)+")";
+        String request = "registerSensor("+JsonPrinter.sensorToJson(sensor)+")";
         wsClient.send(request);
         return waitAndReturnResponse(request);
     }
 
     static public String deleteSensor(Sensor sensor){
         assureClientIsConnected();
-        String request = "deleteRawSensor("+ sensor.getName() +")";
+        String request = "deleteSensor("+ sensor.getName() +")";
         wsClient.send(request);
         return waitAndReturnResponse(request);
     }
