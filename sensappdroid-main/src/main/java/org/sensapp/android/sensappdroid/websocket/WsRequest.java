@@ -30,6 +30,8 @@ import java.util.Map;
 public class WsRequest{
     static private WsClient wsClient = TabsActivity.getClient();
     private static Map<String, String> messages = wsClient.getMessageList();
+    final static int latencyAccepted = 200;         // ms  -- latency/sleepTime = Max Recursive Call Number.
+    final static int sleepTime = 1;                 // ms
 
     static public boolean isSensorRegistered(Sensor sensor){
         assureClientIsConnected();
@@ -149,6 +151,7 @@ public class WsRequest{
                             }
 
                             wsClient.send("registerData("+ JsonPrinter.measuresToJson(model) +")");
+                            //waitAndReturnResponse("registerData("+ JsonPrinter.measuresToJson(model) +")");
                             model.clearValues();
                         }
                         ContentValues values = new ContentValues();
@@ -162,7 +165,7 @@ public class WsRequest{
                 }
             }
         }
-        return waitAndReturnResponse("registerData("+ JsonPrinter.measuresToJson(model) +")");
+        return "true";
     }
 
     static public boolean isCompositeRegistered(Context context, String compositeName){
@@ -191,11 +194,6 @@ public class WsRequest{
     }
 
     static private String waitAndReturnResponse(String request){
-        try {
-            Thread.sleep(200);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         return getResponse(request);
     }
 
@@ -206,18 +204,17 @@ public class WsRequest{
     static private String getResponse(String request, int times){
         String response = messages.get(request);
         if(response!=null) {
-            Log.d("coucou", request + " -> " + response);
+            messages.remove(request);
             return response;
         }
-        if(times != 50){
+        if(times != latencyAccepted/sleepTime){
             try {
-                Thread.sleep(10);
+                Thread.sleep(sleepTime);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
             return getResponse(request, times+1);
         }
-        Log.d("coucou", request + " -> " + "none");
         return "none";
     }
 
