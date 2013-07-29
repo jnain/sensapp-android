@@ -15,15 +15,17 @@
  */
 package org.sensapp.android.sensappdroid.json;
 
-public class ValueJsonModel {
+public class ValueJsonModel<V> {
 	
 	private long t;
+    private V v;
 	
 	public ValueJsonModel() {
 	}
 	
-	public ValueJsonModel(long t) {
+	public ValueJsonModel(long t, V v) {
 		this.t = t;
+        this.v = v;
 	}
 	
 	public long getT() {
@@ -33,4 +35,12 @@ public class ValueJsonModel {
 	public void setT(long t) {
 		this.t = t;
 	}
+
+    public V getV() {
+        return v;
+    }
+
+    public void setV(V v) {
+        this.v = v;
+    }
 }

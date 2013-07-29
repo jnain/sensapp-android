@@ -30,8 +30,8 @@ import java.util.Map;
 public class WsRequest{
     static private WsClient wsClient = TabsActivity.getClient();
     private static Map<String, String> messages = wsClient.getMessageList();
-    final static int latencyAccepted = 200;         // ms  -- latency/sleepTime = Max Recursive Call Number.
-    final static int sleepTime = 1;                 // ms
+    final static int latencyAccepted = 800;         // ms  -- latency/sleepTime = Max Recursive Call Number (200 seems nice).
+    final static int sleepTime = 4;                 // ms
 
     static public boolean isSensorRegistered(Sensor sensor){
         assureClientIsConnected();

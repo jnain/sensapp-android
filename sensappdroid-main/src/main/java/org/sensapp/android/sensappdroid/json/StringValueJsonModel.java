@@ -15,23 +15,20 @@
  */
 package org.sensapp.android.sensappdroid.json;
 
-public class StringValueJsonModel extends ValueJsonModel {
-	
-	private String sv;
+public class StringValueJsonModel extends ValueJsonModel<String> {
 	
 	public StringValueJsonModel() {
 	}
 	
 	public StringValueJsonModel(String sv, long t) {
-		super(t);
-		this.sv = sv;
+		super(t, sv);
 	}
 	
 	public String getSv() {
-		return sv;
+		return getV();
 	}
 	
 	public void setSv(String sv) {
-		this.sv = sv;
+		setV(sv);
 	}
 }

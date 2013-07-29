@@ -35,12 +35,16 @@ public class GraphWrapper {
 	public GraphWrapper() {
 		this.graphBuffer = new GraphBuffer();
 	}
-	
-	public GraphWrapper(long ID, GraphBuffer graphBuffer) {
-		this.ID = ID;
+
+    public GraphWrapper(GraphBuffer graphBuffer){
         this.graphBuffer = graphBuffer;
         this.lowestVisible = graphBuffer.getMinValue();
         this.highestVisible = graphBuffer.getMaxValue();
+    }
+	
+	public GraphWrapper(long ID, GraphBuffer graphBuffer) {
+		this(graphBuffer);
+        this.ID = ID;
 	}
 	
 	public GraphBuffer getBuffer() {

@@ -21,6 +21,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ListFragment;
+import android.util.Log;
 import android.view.*;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView.AdapterContextMenuInfo;
@@ -33,8 +34,7 @@ import org.sensapp.android.sensappdroid.R;
 import org.sensapp.android.sensappdroid.activities.SensAppService;
 import org.sensapp.android.sensappdroid.activities.TabsActivity;
 import org.sensapp.android.sensappdroid.contract.SensAppContract;
-import org.sensapp.android.sensappdroid.json.CompositeJsonModel;
-import org.sensapp.android.sensappdroid.json.SensorJsonModel;
+import org.sensapp.android.sensappdroid.json.*;
 import org.sensapp.android.sensappdroid.preferences.GeneralPrefFragment;
 import org.sensapp.android.sensappdroid.preferences.PreferencesActivity;
 import org.sensapp.android.sensappdroid.websocket.WsRequest;
@@ -71,6 +71,17 @@ public class ServerDataFragment extends ListFragment{
 
         if(GeneralPrefFragment.buildUri(PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext()), getResources())
             .contains("ws://")) {
+
+            WsRequest.assureClientIsConnected();
+
+            TabsActivity.getClient().send("getData(JohnTab_AccelerometerX, null, null, desc, 100, null, null, null)");
+            String rez = WsRequest.waitAndReturnResponse("getData(JohnTab_AccelerometerX, null, null, desc, 100, null, null, null)");
+            Gson gson = new Gson();
+            Type type = new TypeToken<NumericalMeasureJsonModel>(){}.getType();
+            NumericalMeasureJsonModel measures = gson.fromJson(rez, type);
+
+            for(NumericalValueJsonModel v: measures.getE())
+                Log.d("coucou", String.valueOf(v.getV()));
             displayComposites();
         }
 	}
@@ -99,6 +110,7 @@ public class ServerDataFragment extends ListFragment{
         TextView title = (TextView)getActivity().findViewById(R.id.server_data_title);
         title.setText(DISPLAY + " From the Server");
         getActivity().invalidateOptionsMenu();
+        WsRequest.assureClientIsConnected();
         TabsActivity.getClient().send("getSensors()");
         String response = WsRequest.waitAndReturnResponse("getSensors()");
         Gson gson = new Gson();

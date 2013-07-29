@@ -15,7 +15,6 @@
  */
 package org.sensapp.android.sensappdroid.json;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -24,23 +23,19 @@ abstract public class MeasureJsonModel {
 	private String bn;
 	private long bt;
 	private String bu;
-	private List<ValueJsonModel> e;
 	
 	public MeasureJsonModel() {
-		e = new ArrayList<ValueJsonModel>();
 	}
 	
 	public MeasureJsonModel(String bn, String bu) {
 		this.bn = bn;
 		this.bu = bu;
-		e = new ArrayList<ValueJsonModel>();
 	}
 	
-	public MeasureJsonModel(String bn, long bt, String bu, List<ValueJsonModel> e) {
+	public MeasureJsonModel(String bn, long bt, String bu) {
 		this.bn = bn;
 		this.bt = bt;
 		this.bu = bu;
-		this.e = e; 
 	}
 	
 	public String getBn() {
@@ -61,16 +56,9 @@ abstract public class MeasureJsonModel {
 	public void setBu(String bu) {
 		this.bu = bu;
 	}
-	public List<ValueJsonModel> getE() {
-		return e;
-	}
-	public void setE(List<ValueJsonModel> e) {
-		this.e = e;
-	}
-
-	public void clearValues() {
-		e.clear();
-	}
+	abstract public List<? extends ValueJsonModel> getE();
+	//public void setE(List<? extends ValueJsonModel> e);
+    abstract public void clearValues();
 	
 	@Override
 	public String toString() {

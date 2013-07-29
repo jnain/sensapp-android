@@ -15,24 +15,21 @@
  */
 package org.sensapp.android.sensappdroid.json;
 
-public class NumericalValueJsonModel extends ValueJsonModel {
-	
-	private float v;
+public class NumericalValueJsonModel extends ValueJsonModel<Float> {
 	
 	public NumericalValueJsonModel() {
 		super();
 	}
 	
 	public NumericalValueJsonModel(float v, long t) {
-		super(t);
-		this.v = v;
+		super(t, v);
 	}
 	
-	public float getV() {
-		return v;
+	public Float getV() {
+		return super.getV();
 	}
 	
-	public void setV(int v) {
-		this.v = v;
+	public void setV(Float v) {
+		super.setV(v);
 	}
 }
