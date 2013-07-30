@@ -32,6 +32,7 @@ import org.sensapp.android.sensappdroid.graph.GraphBuffer;
 import org.sensapp.android.sensappdroid.graph.GraphWrapper;
 import org.sensapp.android.sensappdroid.json.CompositeJsonModel;
 import org.sensapp.android.sensappdroid.json.NumericalMeasureJsonModel;
+import org.sensapp.android.sensappdroid.json.SensorJsonModel;
 import org.sensapp.android.sensappdroid.websocket.WsRequest;
 
 import java.lang.reflect.Type;
@@ -45,10 +46,10 @@ import java.util.List;
  * Time: 16:21
  * To change this template use File | Settings | File Templates.
  */
-public class ServerCompositeGraphActivity extends FragmentActivity{
+public class ServerGraphDisplayActivity extends FragmentActivity{
 
-    private String compositeName="COMPO";
-    private long graphID=0;
+    private String elementName="COMPO";
+    private String elementType="TYPE";
     private GraphAdapter adapter;
     private List<GraphWrapper> gwl = new ArrayList<GraphWrapper>();
     private Cursor cursorSensors;
@@ -58,7 +59,8 @@ public class ServerCompositeGraphActivity extends FragmentActivity{
         setContentView(R.layout.graph_displayer);
 
         List<String> data = getIntent().getData().getPathSegments();
-        compositeName = data.get(data.size()-1);
+        elementName = data.get(data.size()-1);
+        elementType = data.get(data.size()-2);
         //graphID = Long.parseLong(data.get(data.size() - 2));
 
         //setTitle(graphName);
@@ -77,16 +79,28 @@ public class ServerCompositeGraphActivity extends FragmentActivity{
     private void refreshGraphData(){
         gwl.clear();
 
-        WsRequest.assureClientIsConnected();
-        TabsActivity.getClient().send("getComposite("+compositeName+")");
-        String rez = WsRequest.waitAndReturnResponse("getComposite("+compositeName+")");
-        Gson gson = new Gson();
-        Type type = new TypeToken<CompositeJsonModel>(){}.getType();
-        CompositeJsonModel composite = gson.fromJson(rez, type);
-        List<String> sensorUris = composite.getSensors();
+        if(WsRequest.assureClientIsConnected()){
+            if(elementType.equals("Composites")){
+                TabsActivity.getClient().send("getComposite("+elementName+")");
+                String rez = WsRequest.waitAndReturnResponse("getComposite("+elementName+")");
+                Gson gson = new Gson();
+                Type type = new TypeToken<CompositeJsonModel>(){}.getType();
+                CompositeJsonModel composite = gson.fromJson(rez, type);
+                List<String> sensorUris = composite.getSensors();
 
-        for(String uri: sensorUris)
-            addGraphToWrapperList(gwl, Uri.parse(uri).getLastPathSegment());
+                for(String uri: sensorUris)
+                    addGraphToWrapperList(gwl, Uri.parse(uri).getLastPathSegment());
+            }
+            else{
+                TabsActivity.getClient().send("getSensor("+elementName+")");
+                String rez = WsRequest.waitAndReturnResponse("getSensor("+elementName+")");
+                Gson gson = new Gson();
+                Type type = new TypeToken<SensorJsonModel>(){}.getType();
+                SensorJsonModel sensor = gson.fromJson(rez, type);
+
+                addGraphToWrapperList(gwl, sensor.getId());
+            }
+        }
 
         adapter.notifyDataSetChanged();
     }

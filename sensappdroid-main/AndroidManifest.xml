@@ -59,7 +59,7 @@
             android:label="@string/app_name" >
         </activity>
         <activity android:name=".activities.GraphDisplayerActivity"/>
-        <activity android:name=".activities.ServerCompositeGraphActivity"/>
+        <activity android:name=".activities.ServerGraphDisplayActivity"/>
         <provider
             android:exported="true"
         	android:name=".contentprovider.SensAppContentProvider"

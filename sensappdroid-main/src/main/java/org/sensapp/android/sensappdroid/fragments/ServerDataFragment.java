@@ -30,7 +30,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.sensapp.android.sensappdroid.R;
 import org.sensapp.android.sensappdroid.activities.SensAppService;
-import org.sensapp.android.sensappdroid.activities.ServerCompositeGraphActivity;
+import org.sensapp.android.sensappdroid.activities.ServerGraphDisplayActivity;
 import org.sensapp.android.sensappdroid.activities.TabsActivity;
 import org.sensapp.android.sensappdroid.contract.SensAppContract;
 import org.sensapp.android.sensappdroid.json.CompositeJsonModel;
@@ -173,9 +173,9 @@ public class ServerDataFragment extends ListFragment{
 
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
-        String compositeName = l.getItemAtPosition(position).toString();
-        Intent i = new Intent(getActivity().getApplicationContext(), ServerCompositeGraphActivity.class);
-        i.setData(Uri.parse(compositeName));
+        String elementName = l.getItemAtPosition(position).toString();
+        Intent i = new Intent(getActivity().getApplicationContext(), ServerGraphDisplayActivity.class);
+        i.setData(Uri.parse(DISPLAY +"/"+ elementName));
         startActivity(i);
     }
 }
