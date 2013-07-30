@@ -80,18 +80,19 @@ public class ServerDataFragment extends ListFragment{
         TextView title = (TextView)getActivity().findViewById(R.id.server_data_title);
         title.setText(DISPLAY + " From the Server");
         getActivity().invalidateOptionsMenu();
-        WsRequest.assureClientIsConnected();
-        TabsActivity.getClient().send("getComposites()");
-        String response = WsRequest.waitAndReturnResponse("getComposites()");
-        Gson gson = new Gson();
-        Type collectionType = new TypeToken<List<CompositeJsonModel>>(){}.getType();
-        List<CompositeJsonModel> composites = gson.fromJson(response, collectionType);
-        List<String> compositeNames = new ArrayList<String>();
-        for(CompositeJsonModel c : composites)
-            compositeNames.add(c.getId());
-        adapter = new ArrayAdapter<String>(getActivity().getApplicationContext(), R.layout.server_data_composite, compositeNames);
-        setListAdapter(adapter);
-        registerForContextMenu(getListView());
+        if(WsRequest.assureClientIsConnected()){
+            TabsActivity.getClient().send("getComposites()");
+            String response = WsRequest.waitAndReturnResponse("getComposites()");
+            Gson gson = new Gson();
+            Type collectionType = new TypeToken<List<CompositeJsonModel>>(){}.getType();
+            List<CompositeJsonModel> composites = gson.fromJson(response, collectionType);
+            List<String> compositeNames = new ArrayList<String>();
+            for(CompositeJsonModel c : composites)
+                compositeNames.add(c.getId());
+            adapter = new ArrayAdapter<String>(getActivity().getApplicationContext(), R.layout.server_data_composite, compositeNames);
+            setListAdapter(adapter);
+            registerForContextMenu(getListView());
+        }
     }
 
     private void displaySensors(){
@@ -99,18 +100,19 @@ public class ServerDataFragment extends ListFragment{
         TextView title = (TextView)getActivity().findViewById(R.id.server_data_title);
         title.setText(DISPLAY + " From the Server");
         getActivity().invalidateOptionsMenu();
-        WsRequest.assureClientIsConnected();
-        TabsActivity.getClient().send("getSensors()");
-        String response = WsRequest.waitAndReturnResponse("getSensors()");
-        Gson gson = new Gson();
-        Type collectionType = new TypeToken<List<SensorJsonModel>>(){}.getType();
-        List<SensorJsonModel> sensors = gson.fromJson(response, collectionType);
-        List<String> sensorNames = new ArrayList<String>();
-        for(SensorJsonModel s : sensors)
-            sensorNames.add(s.getId());
-        adapter = new ArrayAdapter<String>(getActivity().getApplicationContext(), R.layout.server_data_composite, sensorNames);
-        setListAdapter(adapter);
-        registerForContextMenu(getListView());
+        if(WsRequest.assureClientIsConnected()){
+            TabsActivity.getClient().send("getSensors()");
+            String response = WsRequest.waitAndReturnResponse("getSensors()");
+            Gson gson = new Gson();
+            Type collectionType = new TypeToken<List<SensorJsonModel>>(){}.getType();
+            List<SensorJsonModel> sensors = gson.fromJson(response, collectionType);
+            List<String> sensorNames = new ArrayList<String>();
+            for(SensorJsonModel s : sensors)
+                sensorNames.add(s.getId());
+            adapter = new ArrayAdapter<String>(getActivity().getApplicationContext(), R.layout.server_data_composite, sensorNames);
+            setListAdapter(adapter);
+            registerForContextMenu(getListView());
+        }
     }
 
 	@Override
@@ -168,16 +170,7 @@ public class ServerDataFragment extends ListFragment{
 		}
 		return super.onContextItemSelected(item);
 	}
-	
-	/*@Override
-	public void onListItemClick(ListView l, View v, int position, long id) {
-        Cursor c = getActivity().getContentResolver().query(Uri.parse(SensAppContract.Graph.CONTENT_URI + "/" + id), null, null, null, null);
-		//Only one graph
-        c.moveToFirst();
-        String graphName = c.getString(c.getColumnIndex(SensAppContract.Graph.TITLE));
-        c.close();
-        graphSelectedListener.onGraphSelected(Uri.parse(SensAppContract.Graph.CONTENT_URI + "/" + id + "/" + graphName));
-	} */
+
     @Override
     public void onListItemClick(ListView l, View v, int position, long id) {
         String compositeName = l.getItemAtPosition(position).toString();

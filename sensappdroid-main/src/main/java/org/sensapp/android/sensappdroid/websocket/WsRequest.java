@@ -34,24 +34,30 @@ public class WsRequest{
     final static int sleepTime = 4;                 // ms
 
     static public boolean isSensorRegistered(Sensor sensor){
-        assureClientIsConnected();
-        String request = "getSensor("+sensor.getName()+")";
-        wsClient.send(request);
-        return !waitAndReturnResponse(request).equals("none");
+        if(assureClientIsConnected()){
+            String request = "getSensor("+sensor.getName()+")";
+            wsClient.send(request);
+            return !waitAndReturnResponse(request).equals("none");
+        }
+        return false;
     }
 
     static public String postSensor(Sensor sensor){
-        assureClientIsConnected();
-        String request = "registerSensor("+JsonPrinter.sensorToJson(sensor)+")";
-        wsClient.send(request);
-        return waitAndReturnResponse(request);
+        if(assureClientIsConnected()){
+            String request = "registerSensor("+JsonPrinter.sensorToJson(sensor)+")";
+            wsClient.send(request);
+            return waitAndReturnResponse(request);
+        }
+        return "none";
     }
 
     static public String deleteSensor(Sensor sensor){
-        assureClientIsConnected();
-        String request = "deleteSensor("+ sensor.getName() +")";
-        wsClient.send(request);
-        return waitAndReturnResponse(request);
+        if(assureClientIsConnected()){
+            String request = "deleteSensor("+ sensor.getName() +")";
+            wsClient.send(request);
+            return waitAndReturnResponse(request);
+        }
+        return "none";
     }
 
     public static final int FLAG_DEFAULT = 0x79;
@@ -66,131 +72,152 @@ public class WsRequest{
     private static Context mContext;
 
     static public String putData(Context context, Uri uri){
-        assureClientIsConnected();
-        int rowTotal = 0;
-        MeasureJsonModel model = null;
-        mContext = context;
-        Cursor cursor = context.getContentResolver().query(uri, new String[]{SensAppContract.Measure.ID}, SensAppContract.Measure.UPLOADED + " = 0", null, null);
-        if (cursor != null) {
-            rowTotal = cursor.getCount();
-            cursor.close();
-        }
-
-        int rowsUploaded = 0;
-        int progress = 0;
-        int sizeLimit = DEFAULT_SIZE_LIMIT;
-
-        ArrayList<String> sensorNames = new ArrayList<String>();
-        cursor = context.getContentResolver().query(uri, new String[]{"DISTINCT " + SensAppContract.Measure.SENSOR}, SensAppContract.Measure.UPLOADED + " = 0", null, null);
-        if (cursor != null) {
-            while (cursor.moveToNext()) {
-                sensorNames.add(cursor.getString(cursor.getColumnIndexOrThrow(SensAppContract.Measure.SENSOR)));
-            }
-            cursor.close();
-        }
-
-        Sensor sensor;
-        for (String sensorName : sensorNames) {
-
-            if (!sensorExists(sensorName)) {
-                return null;
+        if(assureClientIsConnected()){
+            int rowTotal = 0;
+            MeasureJsonModel model = null;
+            mContext = context;
+            Cursor cursor = context.getContentResolver().query(uri, new String[]{SensAppContract.Measure.ID}, SensAppContract.Measure.UPLOADED + " = 0", null, null);
+            if (cursor != null) {
+                rowTotal = cursor.getCount();
+                cursor.close();
             }
 
-            // Update uri with current preference
-            try {
-                ContentValues values = new ContentValues();
-                values.put(SensAppContract.Sensor.URI, GeneralPrefFragment.buildUri(PreferenceManager.getDefaultSharedPreferences(context), context.getResources()));
-                context.getContentResolver().update(Uri.parse(SensAppContract.Sensor.CONTENT_URI + "/" + sensorName), values, null, null);
-            } catch (IllegalStateException e) {
-                Log.e(TAG, e.getMessage());
-                return null;
+            int rowsUploaded = 0;
+            int progress = 0;
+            int sizeLimit = DEFAULT_SIZE_LIMIT;
+
+            ArrayList<String> sensorNames = new ArrayList<String>();
+            cursor = context.getContentResolver().query(uri, new String[]{"DISTINCT " + SensAppContract.Measure.SENSOR}, SensAppContract.Measure.UPLOADED + " = 0", null, null);
+            if (cursor != null) {
+                while (cursor.moveToNext()) {
+                    sensorNames.add(cursor.getString(cursor.getColumnIndexOrThrow(SensAppContract.Measure.SENSOR)));
+                }
+                cursor.close();
             }
 
-            sensor = DatabaseRequest.SensorRQ.getSensor(context, sensorName);
+            Sensor sensor;
+            for (String sensorName : sensorNames) {
 
-            if (!WsRequest.isSensorRegistered(sensor)) {
-                postSensor(sensor);
-            }
+                if (!sensorExists(sensorName)) {
+                    return null;
+                }
 
-            if ("Numerical".equals(sensor.getTemplate())) {
-                model = new NumericalMeasureJsonModel(sensorName, sensor.getUnit());
-            } else if ("String".equals(sensor.getTemplate())) {
-                model = new StringMeasureJsonModel(sensorName, sensor.getUnit());
-            } else {
-                Log.e(TAG, "Incorrect sensor template");
-                return null;
-            }
+                // Update uri with current preference
+                try {
+                    ContentValues values = new ContentValues();
+                    values.put(SensAppContract.Sensor.URI, GeneralPrefFragment.buildUri(PreferenceManager.getDefaultSharedPreferences(context), context.getResources()));
+                    context.getContentResolver().update(Uri.parse(SensAppContract.Sensor.CONTENT_URI + "/" + sensorName), values, null, null);
+                } catch (IllegalStateException e) {
+                    Log.e(TAG, e.getMessage());
+                    return null;
+                }
 
-            List<Integer> ids = new ArrayList<Integer>();
-            for (Long basetime : getBasetimes(sensorName)) {
-                model.setBt(basetime);
-                String[] projection = {SensAppContract.Measure.ID, SensAppContract.Measure.VALUE, SensAppContract.Measure.TIME};
-                String selection = SensAppContract.Measure.SENSOR + " = \"" + model.getBn() + "\" AND " + SensAppContract.Measure.BASETIME + " = " + model.getBt() + " AND " + SensAppContract.Measure.UPLOADED + " = 0";
-                cursor = context.getContentResolver().query(uri, projection, selection, null, null);
-                if (cursor != null) {
-                    if (cursor.getCount() > 0) {
-                        int size = 0;
-                        while (size == 0) {
-                            while (cursor.moveToNext()) {
-                                ids.add(cursor.getInt(cursor.getColumnIndexOrThrow(SensAppContract.Measure.ID)));
-                                long time = cursor.getLong(cursor.getColumnIndexOrThrow(SensAppContract.Measure.TIME));
-                                if (model instanceof NumericalMeasureJsonModel) {
-                                    float value = cursor.getFloat(cursor.getColumnIndexOrThrow(SensAppContract.Measure.VALUE));
-                                    ((NumericalMeasureJsonModel) model).appendMeasure(value, time);
-                                    size += INTEGER_SIZE;
-                                } else if (model instanceof StringMeasureJsonModel) {
-                                    String value = cursor.getString(cursor.getColumnIndexOrThrow(SensAppContract.Measure.VALUE));
-                                    ((StringMeasureJsonModel) model).appendMeasure(value, time);
-                                    size += value.length();
+                sensor = DatabaseRequest.SensorRQ.getSensor(context, sensorName);
+
+                if (!WsRequest.isSensorRegistered(sensor)) {
+                    postSensor(sensor);
+                }
+
+                if ("Numerical".equals(sensor.getTemplate())) {
+                    model = new NumericalMeasureJsonModel(sensorName, sensor.getUnit());
+                } else if ("String".equals(sensor.getTemplate())) {
+                    model = new StringMeasureJsonModel(sensorName, sensor.getUnit());
+                } else {
+                    Log.e(TAG, "Incorrect sensor template");
+                    return null;
+                }
+
+                List<Integer> ids = new ArrayList<Integer>();
+                for (Long basetime : getBasetimes(sensorName)) {
+                    model.setBt(basetime);
+                    String[] projection = {SensAppContract.Measure.ID, SensAppContract.Measure.VALUE, SensAppContract.Measure.TIME};
+                    String selection = SensAppContract.Measure.SENSOR + " = \"" + model.getBn() + "\" AND " + SensAppContract.Measure.BASETIME + " = " + model.getBt() + " AND " + SensAppContract.Measure.UPLOADED + " = 0";
+                    cursor = context.getContentResolver().query(uri, projection, selection, null, null);
+                    if (cursor != null) {
+                        if (cursor.getCount() > 0) {
+                            int size = 0;
+                            while (size == 0) {
+                                while (cursor.moveToNext()) {
+                                    ids.add(cursor.getInt(cursor.getColumnIndexOrThrow(SensAppContract.Measure.ID)));
+                                    long time = cursor.getLong(cursor.getColumnIndexOrThrow(SensAppContract.Measure.TIME));
+                                    if (model instanceof NumericalMeasureJsonModel) {
+                                        float value = cursor.getFloat(cursor.getColumnIndexOrThrow(SensAppContract.Measure.VALUE));
+                                        ((NumericalMeasureJsonModel) model).appendMeasure(value, time);
+                                        size += INTEGER_SIZE;
+                                    } else if (model instanceof StringMeasureJsonModel) {
+                                        String value = cursor.getString(cursor.getColumnIndexOrThrow(SensAppContract.Measure.VALUE));
+                                        ((StringMeasureJsonModel) model).appendMeasure(value, time);
+                                        size += value.length();
+                                    }
+                                    size += LONG_SIZE;
+                                    if (size > sizeLimit && !cursor.isLast()) {
+                                        size = 0;
+                                        break;
+                                    }
                                 }
-                                size += LONG_SIZE;
-                                if (size > sizeLimit && !cursor.isLast()) {
-                                    size = 0;
-                                    break;
-                                }
+
+                                wsClient.send("registerData("+ JsonPrinter.measuresToJson(model) +")");
+                                //waitAndReturnResponse("registerData("+ JsonPrinter.measuresToJson(model) +")");
+                                model.clearValues();
                             }
-
-                            wsClient.send("registerData("+ JsonPrinter.measuresToJson(model) +")");
-                            //waitAndReturnResponse("registerData("+ JsonPrinter.measuresToJson(model) +")");
-                            model.clearValues();
+                            ContentValues values = new ContentValues();
+                            values.put(SensAppContract.Measure.UPLOADED, 1);
+                            selection = SensAppContract.Measure.ID + " IN " + ids.toString().replace('[', '(').replace(']', ')');
+                            rowsUploaded += context.getContentResolver().update(uri, values, selection, null);
+                            progress += ids.size();
+                            ids.clear();
                         }
-                        ContentValues values = new ContentValues();
-                        values.put(SensAppContract.Measure.UPLOADED, 1);
-                        selection = SensAppContract.Measure.ID + " IN " + ids.toString().replace('[', '(').replace(']', ')');
-                        rowsUploaded += context.getContentResolver().update(uri, values, selection, null);
-                        progress += ids.size();
-                        ids.clear();
+                        cursor.close();
                     }
-                    cursor.close();
                 }
             }
+            return "true";
         }
-        return "true";
+        return "none";
     }
 
     static public boolean isCompositeRegistered(Context context, String compositeName){
         Composite composite = DatabaseRequest.CompositeRQ.getComposite(context, compositeName);
-        assureClientIsConnected();
-        String request = "getComposite(" + composite.getName() + ")";
-        wsClient.send(request);
-        return !waitAndReturnResponse(request).equals("none");
+        if(assureClientIsConnected()){
+            String request = "getComposite(" + composite.getName() + ")";
+            wsClient.send(request);
+            return !waitAndReturnResponse(request).equals("none");
+        }
+        return false;
     }
 
     static public String postComposite(Context context, String compositeName){
         Composite composite = DatabaseRequest.CompositeRQ.getComposite(context, compositeName);
-        assureClientIsConnected();
-        String request = "registerComposite(" + JsonPrinter.compositeToJson(composite) + ")";
-        wsClient.send(request);
-        return waitAndReturnResponse(request);
+        if(assureClientIsConnected()){
+            String request = "registerComposite(" + JsonPrinter.compositeToJson(composite) + ")";
+            wsClient.send(request);
+            return waitAndReturnResponse(request);
+        }
+        return "none";
     }
 
-    static public void assureClientIsConnected(){
-        if(!wsClient.getConnected()){
+    static int times = 0;
+    static public boolean assureClientIsConnected(){
+        while(!wsClient.getConnected()){
             TabsActivity.resetClient();
             wsClient = TabsActivity.getClient();
             wsClient.connect();
+
+            if(times < latencyAccepted/sleepTime){
+                times ++;
+                try {
+                    Thread.sleep(sleepTime);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+            else{
+                times = 0;
+                Log.e(WsRequest.class.getSimpleName(), "Unable to connect.");
+                return false;
+            }
         }
-        while(!wsClient.getConnected());
+        return true;
     }
 
     static public String waitAndReturnResponse(String request){
