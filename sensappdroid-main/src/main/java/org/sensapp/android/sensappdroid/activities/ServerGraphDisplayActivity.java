@@ -83,6 +83,8 @@ public class ServerGraphDisplayActivity extends FragmentActivity{
             if(elementType.equals("Composites")){
                 TabsActivity.getClient().send("getComposite("+elementName+")");
                 String rez = WsRequest.waitAndReturnResponse("getComposite("+elementName+")");
+                if(rez.equals("none"))
+                    return;
                 Gson gson = new Gson();
                 Type type = new TypeToken<CompositeJsonModel>(){}.getType();
                 CompositeJsonModel composite = gson.fromJson(rez, type);
@@ -94,6 +96,8 @@ public class ServerGraphDisplayActivity extends FragmentActivity{
             else{
                 TabsActivity.getClient().send("getSensor("+elementName+")");
                 String rez = WsRequest.waitAndReturnResponse("getSensor("+elementName+")");
+                if(rez.equals("none"))
+                    return;
                 Gson gson = new Gson();
                 Type type = new TypeToken<SensorJsonModel>(){}.getType();
                 SensorJsonModel sensor = gson.fromJson(rez, type);

@@ -43,6 +43,7 @@ public class WsClient extends WebSocketClient {
         // The codecodes are documented in class org.java_websocket.framing.CloseFrame
         Log.d("coucou", "Connection closed by " + (remote ? "remote peer" : "us"));
         connected = false;
+        receivedMessages.clear();
     }
 
     @Override

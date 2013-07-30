@@ -83,6 +83,8 @@ public class ServerDataFragment extends ListFragment{
         if(WsRequest.assureClientIsConnected()){
             TabsActivity.getClient().send("getComposites()");
             String response = WsRequest.waitAndReturnResponse("getComposites()");
+            if(response.equals("none"))
+                return;
             Gson gson = new Gson();
             Type collectionType = new TypeToken<List<CompositeJsonModel>>(){}.getType();
             List<CompositeJsonModel> composites = gson.fromJson(response, collectionType);
@@ -103,6 +105,8 @@ public class ServerDataFragment extends ListFragment{
         if(WsRequest.assureClientIsConnected()){
             TabsActivity.getClient().send("getSensors()");
             String response = WsRequest.waitAndReturnResponse("getSensors()");
+            if(response.equals("none"))
+                return;
             Gson gson = new Gson();
             Type collectionType = new TypeToken<List<SensorJsonModel>>(){}.getType();
             List<SensorJsonModel> sensors = gson.fromJson(response, collectionType);
