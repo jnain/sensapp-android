@@ -201,6 +201,7 @@ public class WsRequest{
         if(!wsClient.getConnected()){
             TabsActivity.resetClient();
             wsClient = TabsActivity.getClient();
+            messages = wsClient.getMessageList();
             wsClient.connect();
         }
         while(!wsClient.getConnected()){
