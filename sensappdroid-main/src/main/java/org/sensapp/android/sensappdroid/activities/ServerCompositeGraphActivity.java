@@ -20,18 +20,21 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.widget.ListView;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import org.sensapp.android.sensappdroid.R;
-import org.sensapp.android.sensappdroid.contract.SensAppContract;
 import org.sensapp.android.sensappdroid.graph.GraphAdapter;
 import org.sensapp.android.sensappdroid.graph.GraphBaseView;
 import org.sensapp.android.sensappdroid.graph.GraphBuffer;
 import org.sensapp.android.sensappdroid.graph.GraphWrapper;
+import org.sensapp.android.sensappdroid.json.CompositeJsonModel;
+import org.sensapp.android.sensappdroid.json.NumericalMeasureJsonModel;
 import org.sensapp.android.sensappdroid.websocket.WsRequest;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +47,7 @@ import java.util.List;
  */
 public class ServerCompositeGraphActivity extends FragmentActivity{
 
-    private String graphName="GRAPH";
+    private String compositeName="COMPO";
     private long graphID=0;
     private GraphAdapter adapter;
     private List<GraphWrapper> gwl = new ArrayList<GraphWrapper>();
@@ -55,12 +58,12 @@ public class ServerCompositeGraphActivity extends FragmentActivity{
         setContentView(R.layout.graph_displayer);
 
         List<String> data = getIntent().getData().getPathSegments();
-        graphName = data.get(data.size()-1);
-        graphID = Long.parseLong(data.get(data.size() - 2));
+        compositeName = data.get(data.size()-1);
+        //graphID = Long.parseLong(data.get(data.size() - 2));
 
-        setTitle(graphName);
+        //setTitle(graphName);
 
-        ListView list = (ListView) findViewById(R.id.list_graph_displayer);
+        //ListView list = (ListView) findViewById(R.id.list_graph_displayer);
 
         displayGraphs();
     }
@@ -74,40 +77,49 @@ public class ServerCompositeGraphActivity extends FragmentActivity{
     private void refreshGraphData(){
         gwl.clear();
 
-        addGraphToWrapperList(gwl, "JohnTab_AccelerometerX");
+        WsRequest.assureClientIsConnected();
+        TabsActivity.getClient().send("getComposite("+compositeName+")");
+        String rez = WsRequest.waitAndReturnResponse("getComposite("+compositeName+")");
+        Gson gson = new Gson();
+        Type type = new TypeToken<CompositeJsonModel>(){}.getType();
+        CompositeJsonModel composite = gson.fromJson(rez, type);
+        List<String> sensorUris = composite.getSensors();
+
+        for(String uri: sensorUris)
+            addGraphToWrapperList(gwl, Uri.parse(uri).getLastPathSegment());
 
         adapter.notifyDataSetChanged();
     }
 
     private Integer displayGraphs(){
-        cursorSensors = getContentResolver().query(Uri.parse(SensAppContract.GraphSensor.CONTENT_URI + "/graph/" + graphID), null, null, null, null);
+        //cursorSensors = getContentResolver().query(Uri.parse(SensAppContract.GraphSensor.CONTENT_URI + "/graph/" + graphID), null, null, null, null);
         adapter = new GraphAdapter(getApplicationContext(), gwl);
 
         ListView list = (ListView) findViewById(R.id.list_graph_displayer);
         list.setAdapter(adapter);
         refreshGraphData();
-        cursorSensors.close();
+        //cursorSensors.close();
         return 1;
     }
 
     @Override
     public void onResume(){
         super.onResume();
-        displayGraphs();
+        //displayGraphs();
     }
 
     private void addGraphToWrapperList(List<GraphWrapper> gwl, String sensor){
         GraphBuffer buffer = new GraphBuffer();
 
-
         WsRequest.assureClientIsConnected();
-        TabsActivity.getClient().send("getData("+sensor+", null, null, null, 100, null, null, null)");
-        String response = WsRequest.waitAndReturnResponse("getData("+sensor+", null, null, null, 100, null, null, null)");
+        TabsActivity.getClient().send("getData("+sensor+", null, null, desc, 100, null, null, null)");
+        String rez = WsRequest.waitAndReturnResponse("getData("+sensor+", null, null, desc, 100, null, null, null)");
+        Gson gson = new Gson();
+        Type type = new TypeToken<NumericalMeasureJsonModel>(){}.getType();
+        NumericalMeasureJsonModel measures = gson.fromJson(rez, type);
 
-        Log.d("coucou", response);
-
-        //buffer.insertData(cursor.getFloat(cursor.getColumnIndex(SensAppContract.Measure.VALUE)));
-
+        for(int i=measures.getE().size()-1; i>=0; i--)
+            buffer.insertData(measures.getE().get(i).getV());
 
         GraphWrapper wrapper = new GraphWrapper(buffer);
         wrapper.setGraphOptions(Color.BLUE, 500, GraphBaseView.LINECHART, sensor);

@@ -16,12 +16,10 @@
 package org.sensapp.android.sensappdroid.fragments;
 
 import android.content.Intent;
-import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ListFragment;
-import android.util.Log;
 import android.view.*;
 import android.view.ContextMenu.ContextMenuInfo;
 import android.widget.AdapterView.AdapterContextMenuInfo;
@@ -32,9 +30,11 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.sensapp.android.sensappdroid.R;
 import org.sensapp.android.sensappdroid.activities.SensAppService;
+import org.sensapp.android.sensappdroid.activities.ServerCompositeGraphActivity;
 import org.sensapp.android.sensappdroid.activities.TabsActivity;
 import org.sensapp.android.sensappdroid.contract.SensAppContract;
-import org.sensapp.android.sensappdroid.json.*;
+import org.sensapp.android.sensappdroid.json.CompositeJsonModel;
+import org.sensapp.android.sensappdroid.json.SensorJsonModel;
 import org.sensapp.android.sensappdroid.preferences.GeneralPrefFragment;
 import org.sensapp.android.sensappdroid.preferences.PreferencesActivity;
 import org.sensapp.android.sensappdroid.websocket.WsRequest;
@@ -71,17 +71,6 @@ public class ServerDataFragment extends ListFragment{
 
         if(GeneralPrefFragment.buildUri(PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext()), getResources())
             .contains("ws://")) {
-
-            WsRequest.assureClientIsConnected();
-
-            TabsActivity.getClient().send("getData(JohnTab_AccelerometerX, null, null, desc, 100, null, null, null)");
-            String rez = WsRequest.waitAndReturnResponse("getData(JohnTab_AccelerometerX, null, null, desc, 100, null, null, null)");
-            Gson gson = new Gson();
-            Type type = new TypeToken<NumericalMeasureJsonModel>(){}.getType();
-            NumericalMeasureJsonModel measures = gson.fromJson(rez, type);
-
-            for(NumericalValueJsonModel v: measures.getE())
-                Log.d("coucou", String.valueOf(v.getV()));
             displayComposites();
         }
 	}
@@ -180,7 +169,7 @@ public class ServerDataFragment extends ListFragment{
 		return super.onContextItemSelected(item);
 	}
 	
-	@Override
+	/*@Override
 	public void onListItemClick(ListView l, View v, int position, long id) {
         Cursor c = getActivity().getContentResolver().query(Uri.parse(SensAppContract.Graph.CONTENT_URI + "/" + id), null, null, null, null);
 		//Only one graph
@@ -188,5 +177,12 @@ public class ServerDataFragment extends ListFragment{
         String graphName = c.getString(c.getColumnIndex(SensAppContract.Graph.TITLE));
         c.close();
         graphSelectedListener.onGraphSelected(Uri.parse(SensAppContract.Graph.CONTENT_URI + "/" + id + "/" + graphName));
-	}
+	} */
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        String compositeName = l.getItemAtPosition(position).toString();
+        Intent i = new Intent(getActivity().getApplicationContext(), ServerCompositeGraphActivity.class);
+        i.setData(Uri.parse(compositeName));
+        startActivity(i);
+    }
 }
