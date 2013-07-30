@@ -34,7 +34,6 @@ public class WsClient extends WebSocketClient {
     public void onMessage( String message ) {
         //Log.d("coucou", "received: " + message);
         // send( "you said: " + message );
-        String split[] = message.split(", ");
         receivedMessages.put(message.substring(0, message.indexOf(")")+1), message.substring(message.indexOf("), ")+"), ".length()));
         //Log.d("coucou", "messages: " + message.substring(0, message.indexOf(")")+1)+"\n"+message.substring(message.indexOf("), ")+"), ".length()));
     }

@@ -17,6 +17,7 @@ package org.sensapp.android.sensappdroid.json;
 
 import org.sensapp.android.sensappdroid.models.NumericalMeasure;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -26,10 +27,12 @@ public class NumericalMeasureJsonModel extends MeasureJsonModel {
 
 	public NumericalMeasureJsonModel() {
 		super();
+        e = new ArrayList<NumericalValueJsonModel>();
 	}
 	
 	public NumericalMeasureJsonModel(String bn, String bu) {
 		super(bn, bu);
+        e = new ArrayList<NumericalValueJsonModel>();
 	}
 	
 	public NumericalMeasureJsonModel(String bn, long bt, String bu, List<NumericalValueJsonModel> e) {

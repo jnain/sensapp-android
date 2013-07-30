@@ -198,11 +198,12 @@ public class WsRequest{
 
     static int times = 0;
     static public boolean assureClientIsConnected(){
-        while(!wsClient.getConnected()){
+        if(!wsClient.getConnected()){
             TabsActivity.resetClient();
             wsClient = TabsActivity.getClient();
             wsClient.connect();
-
+        }
+        while(!wsClient.getConnected()){
             if(times < latencyAccepted/sleepTime){
                 times ++;
                 try {
