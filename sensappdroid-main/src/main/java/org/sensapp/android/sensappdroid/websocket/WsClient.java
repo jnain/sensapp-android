@@ -4,6 +4,7 @@ import android.util.Log;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.drafts.Draft;
 import org.java_websocket.handshake.ServerHandshake;
+import org.sensapp.android.sensappdroid.activities.ServerGraphDisplayActivity;
 
 import java.net.URI;
 import java.util.Hashtable;
@@ -34,7 +35,11 @@ public class WsClient extends WebSocketClient {
     public void onMessage( String message ) {
         //Log.d("coucou", "received: " + message);
         // send( "you said: " + message );
-        receivedMessages.put(message.substring(0, message.indexOf(")")+1), message.substring(message.indexOf("), ")+"), ".length()));
+        if(isDataNotification(message)){
+            ServerGraphDisplayActivity.onDataReceived(message.substring(message.indexOf(" ")));
+        }
+        else
+            receivedMessages.put(message.substring(0, message.indexOf(")")+1), message.substring(message.indexOf("), ")+"), ".length()));
         //Log.d("coucou", "messages: " + message.substring(0, message.indexOf(")")+1)+"\n"+message.substring(message.indexOf("), ")+"), ".length()));
     }
 
@@ -58,5 +63,9 @@ public class WsClient extends WebSocketClient {
 
     public Map<String, String> getMessageList(){
         return receivedMessages;
+    }
+
+    private boolean isDataNotification(String m){
+        return m.substring(0, m.indexOf(" ")).equals("DataNotification");
     }
 }

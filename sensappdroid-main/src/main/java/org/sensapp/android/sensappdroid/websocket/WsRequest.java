@@ -37,7 +37,8 @@ public class WsRequest{
         if(assureClientIsConnected()){
             String request = "getSensor("+sensor.getName()+")";
             wsClient.send(request);
-            return !waitAndReturnResponse(request).equals("none");
+            String rez = waitAndReturnResponse(request);
+            return !rez.substring(0, rez.indexOf(" ")).equals("Unknown");
         }
         return false;
     }
@@ -115,6 +116,7 @@ public class WsRequest{
                 sensor = DatabaseRequest.SensorRQ.getSensor(context, sensorName);
 
                 if (!WsRequest.isSensorRegistered(sensor)) {
+                    //Log.d("coucou", "pas la sensor");
                     postSensor(sensor);
                 }
 
@@ -181,7 +183,8 @@ public class WsRequest{
         if(assureClientIsConnected()){
             String request = "getComposite(" + composite.getName() + ")";
             wsClient.send(request);
-            return !waitAndReturnResponse(request).equals("none");
+            String rez = waitAndReturnResponse(request);
+            return !rez.substring(0, rez.indexOf(" ")).equals("Unknown");
         }
         return false;
     }

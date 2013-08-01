@@ -42,7 +42,7 @@ import org.sensapp.android.sensappdroid.contract.SensAppContract;
 import org.sensapp.android.sensappdroid.datarequests.DeleteCompositeTask;
 import org.sensapp.android.sensappdroid.preferences.GeneralPrefFragment;
 import org.sensapp.android.sensappdroid.preferences.PreferencesActivity;
-import org.sensapp.android.sensappdroid.restrequests.PostCompositeRestTask;
+import org.sensapp.android.sensappdroid.request.PostComposite;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -235,7 +235,8 @@ public class CompositeListFragment extends ListFragment implements LoaderCallbac
 			ManageCompositeDialogFragment.newInstance(name).show(getFragmentManager(), "ManageCompositeDialog");
 			return true;
 		case MENU_UPLOAD_ID:
-			new PostCompositeRestTask(getActivity(), name).execute();
+			new PostComposite(PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext()),
+                    getResources(), getActivity(), name);
 			return true;
 		}
 		return super.onContextItemSelected(item);

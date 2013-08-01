@@ -15,18 +15,15 @@
  */
 package org.sensapp.android.sensappdroid.json;
 
-import java.io.IOException;
-import java.util.ArrayList;
-
-
-
+import android.net.Uri;
 import org.codehaus.jackson.JsonGenerationException;
 import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.sensapp.android.sensappdroid.models.Composite;
 import org.sensapp.android.sensappdroid.models.Sensor;
 
-import android.net.Uri;
+import java.io.IOException;
+import java.util.ArrayList;
 
 public final class JsonPrinter {
 
@@ -96,4 +93,18 @@ public final class JsonPrinter {
 		}
 		return jsonString;
 	}
+
+    public static String subscriptionToJson(SubscriptionJsonModel jsonModel) {
+        String jsonString = null;
+        try {
+            jsonString = mapper.writeValueAsString(jsonModel);
+        } catch (JsonGenerationException e) {
+            e.printStackTrace();
+        } catch (JsonMappingException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return jsonString;
+    }
 }

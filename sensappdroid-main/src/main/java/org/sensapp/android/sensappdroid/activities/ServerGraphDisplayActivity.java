@@ -20,6 +20,7 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.widget.ListView;
@@ -30,9 +31,7 @@ import org.sensapp.android.sensappdroid.graph.GraphAdapter;
 import org.sensapp.android.sensappdroid.graph.GraphBaseView;
 import org.sensapp.android.sensappdroid.graph.GraphBuffer;
 import org.sensapp.android.sensappdroid.graph.GraphWrapper;
-import org.sensapp.android.sensappdroid.json.CompositeJsonModel;
-import org.sensapp.android.sensappdroid.json.NumericalMeasureJsonModel;
-import org.sensapp.android.sensappdroid.json.SensorJsonModel;
+import org.sensapp.android.sensappdroid.json.*;
 import org.sensapp.android.sensappdroid.websocket.WsRequest;
 
 import java.lang.reflect.Type;
@@ -50,8 +49,9 @@ public class ServerGraphDisplayActivity extends FragmentActivity{
 
     private String elementName="COMPO";
     private String elementType="TYPE";
-    private GraphAdapter adapter;
-    private List<GraphWrapper> gwl = new ArrayList<GraphWrapper>();
+    static private GraphAdapter adapter;
+    static private List<GraphWrapper> gwl = new ArrayList<GraphWrapper>();
+
     private Cursor cursorSensors;
 
     public void onCreate(Bundle savedInstanceState) {
@@ -134,6 +134,8 @@ public class ServerGraphDisplayActivity extends FragmentActivity{
         WsRequest.assureClientIsConnected();
         TabsActivity.getClient().send("getData("+sensor+", null, null, desc, 100, null, null, null)");
         String rez = WsRequest.waitAndReturnResponse("getData("+sensor+", null, null, desc, 100, null, null, null)");
+        if(rez.equals("none"))
+            return;
         Gson gson = new Gson();
         Type type = new TypeToken<NumericalMeasureJsonModel>(){}.getType();
         NumericalMeasureJsonModel measures = gson.fromJson(rez, type);
@@ -146,5 +148,55 @@ public class ServerGraphDisplayActivity extends FragmentActivity{
         wrapper.setPrinterParameters(true, false, true);
 
         gwl.add(wrapper);
+
+        WsRequest.assureClientIsConnected();
+        TabsActivity.getClient().send("getNotification("+sensor+")");
+        if((rez = WsRequest.waitAndReturnResponse("getNotification("+sensor+")")).equals("none")){
+            List<String> hooks = new ArrayList<String>();
+            hooks.add("coucou");
+            String notifString = JsonPrinter.subscriptionToJson(new SubscriptionJsonModel(sensor, hooks, "ws"));
+            TabsActivity.getClient().send("registerNotification("+notifString+")");
+            rez = WsRequest.waitAndReturnResponse("registerNotification("+notifString+")");
+        }
+
+        type = new TypeToken<SubscriptionJsonModel>(){}.getType();
+        SubscriptionJsonModel subscription = gson.fromJson(rez, type);
+        if(subscription.getProtocol() == null || subscription.getProtocol().equals("http")){
+            subscription.setProtocol("ws");
+            String notifString = JsonPrinter.subscriptionToJson(subscription);
+            TabsActivity.getClient().send("updateNotification("+notifString+")");
+            rez = WsRequest.waitAndReturnResponse("updateNotification("+notifString+")");
+            subscription = gson.fromJson(rez, type);
+        }
+
+        TabsActivity.getClient().send("getNotified("+subscription.getId()+")");
+        //Log.d("coucou", WsRequest.waitAndReturnResponse("getNotified(" + subscription.getId() + ")"));
+    }
+
+    static public void onDataReceived(String data){
+        if(gwl == null)
+            return;
+        Gson gson = new Gson();
+        Type type = new TypeToken<NumericalMeasureJsonModel>(){}.getType();
+        NumericalMeasureJsonModel measures = gson.fromJson(data, type);
+
+        GraphBuffer buffer = getBufferByName(measures.getBn());
+        for(NumericalValueJsonModel value: measures.getE()){
+            buffer.insertData(value.getV());
+        }
+        adapter.notifyDataSetChanged();
+        //Log.d("coucou", "tried to refresh");
+        //gwl, name, buffer.
+        //trouver le bon graph
+        //ajouter les values au graph
+        //refresh screen.
+    }
+
+    static private GraphBuffer getBufferByName(String name){
+        for(GraphWrapper gw: gwl){
+            if(gw.getName().equals(name))
+                return gw.getBuffer();
+        }
+        return null;
     }
 }
