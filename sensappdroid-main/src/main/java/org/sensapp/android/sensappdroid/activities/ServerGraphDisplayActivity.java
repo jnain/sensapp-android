@@ -70,11 +70,11 @@ public class ServerGraphDisplayActivity extends FragmentActivity{
         displayGraphs();
     }
 
-    public boolean onCreateOptionsMenu(Menu menu) {
+    /*public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.composite_menu, menu);
         return true;
-    }
+    } */
 
     private void refreshGraphData(){
         gwl.clear();

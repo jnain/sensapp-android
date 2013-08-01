@@ -38,7 +38,7 @@ public class WsRequest{
             String request = "getSensor("+sensor.getName()+")";
             wsClient.send(request);
             String rez = waitAndReturnResponse(request);
-            return !rez.substring(0, rez.indexOf(" ")).equals("Unknown");
+            return !rez.equals("none") || !rez.substring(0, rez.indexOf(" ")).equals("Unknown");
         }
         return false;
     }
