@@ -180,6 +180,8 @@ public class ServerGraphDisplayActivity extends FragmentActivity{
         Type type = new TypeToken<NumericalMeasureJsonModel>(){}.getType();
         NumericalMeasureJsonModel measures = gson.fromJson(data, type);
 
+        //Log.d("coucou", measures.getBn()) ;
+
         GraphBuffer buffer = getBufferByName(measures.getBn());
         for(NumericalValueJsonModel value: measures.getE()){
             buffer.insertData(value.getV());

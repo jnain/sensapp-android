@@ -206,4 +206,10 @@ public class TabsActivity extends FragmentActivity implements OnCompositeSelecte
     static public void resetClient(){
         mClient = new WsClient(URI.create(ServerURL), new Draft_17());
     }
+
+    @Override
+    protected void onDestroy() {
+        mClient.close();
+        super.onDestroy();
+    }
 }
