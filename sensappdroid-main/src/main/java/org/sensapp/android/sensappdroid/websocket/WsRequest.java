@@ -38,7 +38,7 @@ public class WsRequest{
             String request = "getSensor("+sensor.getName()+")";
             wsClient.send(request);
             String rez = waitAndReturnResponse(request);
-            return !rez.equals("none") || !rez.substring(0, rez.indexOf(" ")).equals("Unknown");
+            return !rez.equals("none") && !rez.substring(0, rez.indexOf(" ")).equals("Unknown");
         }
         return false;
     }
@@ -184,12 +184,21 @@ public class WsRequest{
             String request = "getComposite(" + composite.getName() + ")";
             wsClient.send(request);
             String rez = waitAndReturnResponse(request);
-            return !rez.equals("none") || !rez.substring(0, rez.indexOf(" ")).equals("Unknown");
+            return !rez.equals("none") && !rez.substring(0, rez.indexOf(" ")).equals("Unknown");
         }
         return false;
     }
 
     static public String postComposite(Context context, String compositeName){
+        try {
+            ContentValues values = new ContentValues();
+            values.put(SensAppContract.Composite.URI, GeneralPrefFragment.buildUri(PreferenceManager.getDefaultSharedPreferences(context), context.getResources()));
+            context.getContentResolver().update(Uri.parse(SensAppContract.Composite.CONTENT_URI + "/" + compositeName), values, null, null);
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+            return null;
+        }
+
         Composite composite = DatabaseRequest.CompositeRQ.getComposite(context, compositeName);
         if(assureClientIsConnected()){
             String request = "registerComposite(" + JsonPrinter.compositeToJson(composite) + ")";

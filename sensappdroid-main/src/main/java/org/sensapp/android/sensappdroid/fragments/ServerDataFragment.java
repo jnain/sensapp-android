@@ -142,10 +142,13 @@ public class ServerDataFragment extends ListFragment{
 		i.setData(uri);
 		switch (item.getItemId()) {
 		case R.id.server_data_switch:
-            if(DISPLAY.equals("Composites"))
-                displaySensors();
-            else
-                displayComposites();
+            if(GeneralPrefFragment.buildUri(PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext()), getResources())
+                    .contains("ws://")){
+                if(DISPLAY.equals("Composites"))
+                    displaySensors();
+                else
+                    displayComposites();
+            }
             //NewGraphDialogFragment.newInstance().show(getFragmentManager(), "NewGraphDialog");
             return true;
 		case R.id.preferences:
