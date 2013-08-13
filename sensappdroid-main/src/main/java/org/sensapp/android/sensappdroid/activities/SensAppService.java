@@ -113,7 +113,7 @@ public class SensAppService extends Service implements PutMeasureCallback {
             waitForDataAuto = true;
         } else {
             waitForDataAuto = false;
-            Set<String> names = PreferenceManager.getDefaultSharedPreferences(this).getStringSet(AutoUploadSensorDialog.SENSOR_MAINTAINED, null);
+            Set<String> names = PreferenceManager.getDefaultSharedPreferences(this).getStringSet(AutoUploadSensorDialog.HTTP_UPLOAD, null);
             if (names != null && !names.isEmpty()) {
                 for (final String name : names) {
                     //new PutMeasuresTask(this, taskIdGen(), getApplicationContext(), Uri.parse(SensAppContract.Measure.CONTENT_URI + "/" + name), PutMeasuresTask.FLAG_SILENT).execute();
