@@ -25,7 +25,6 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.RadioButton;
@@ -108,7 +107,6 @@ public class AutoUploadSensorDialog extends DialogFragment {
 		String[] names = new String[cursor.getCount()];
 		final Set<String> autoUploadHTTP = PreferenceManager.getDefaultSharedPreferences(getActivity()).getStringSet(HTTP_UPLOAD, new HashSet<String>());
         final Set<String> autoUploadWS = PreferenceManager.getDefaultSharedPreferences(getActivity()).getStringSet(WS_UPLOAD, new HashSet<String>());
-		Log.d("coucou", autoUploadHTTP.toString() + "\r\n" + autoUploadWS.toString());
 
         LinearLayout vList = new LinearLayout(this.getActivity());
         vList.setOrientation(LinearLayout.VERTICAL);

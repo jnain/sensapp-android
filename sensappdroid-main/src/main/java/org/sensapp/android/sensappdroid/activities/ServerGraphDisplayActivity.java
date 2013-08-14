@@ -20,9 +20,6 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
 import android.widget.ListView;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -61,20 +58,9 @@ public class ServerGraphDisplayActivity extends FragmentActivity{
         List<String> data = getIntent().getData().getPathSegments();
         elementName = data.get(data.size()-1);
         elementType = data.get(data.size()-2);
-        //graphID = Long.parseLong(data.get(data.size() - 2));
-
-        //setTitle(graphName);
-
-        //ListView list = (ListView) findViewById(R.id.list_graph_displayer);
 
         displayGraphs();
     }
-
-    /*public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.composite_menu, menu);
-        return true;
-    } */
 
     private void refreshGraphData(){
         gwl.clear();
@@ -112,20 +98,18 @@ public class ServerGraphDisplayActivity extends FragmentActivity{
     }
 
     private Integer displayGraphs(){
-        //cursorSensors = getContentResolver().query(Uri.parse(SensAppContract.GraphSensor.CONTENT_URI + "/graph/" + graphID), null, null, null, null);
+
         adapter = new GraphAdapter(getApplicationContext(), gwl);
 
         ListView list = (ListView) findViewById(R.id.list_graph_displayer);
         list.setAdapter(adapter);
         refreshGraphData();
-        //cursorSensors.close();
         return 1;
     }
 
     @Override
     public void onResume(){
         super.onResume();
-        //displayGraphs();
     }
 
     private void addGraphToWrapperList(List<GraphWrapper> gwl, String sensor){
@@ -170,7 +154,6 @@ public class ServerGraphDisplayActivity extends FragmentActivity{
         }
 
         TabsActivity.getClient().send("getNotified("+subscription.getId()+")");
-        //Log.d("coucou", WsRequest.waitAndReturnResponse("getNotified(" + subscription.getId() + ")"));
     }
 
     static public void onDataReceived(String data){
@@ -180,18 +163,11 @@ public class ServerGraphDisplayActivity extends FragmentActivity{
         Type type = new TypeToken<NumericalMeasureJsonModel>(){}.getType();
         NumericalMeasureJsonModel measures = gson.fromJson(data, type);
 
-        //Log.d("coucou", measures.getBn()) ;
-
         GraphBuffer buffer = getBufferByName(measures.getBn());
         for(NumericalValueJsonModel value: measures.getE()){
             buffer.insertData(value.getV());
         }
         adapter.notifyDataSetChanged();
-        //Log.d("coucou", "tried to refresh");
-        //gwl, name, buffer.
-        //trouver le bon graph
-        //ajouter les values au graph
-        //refresh screen.
     }
 
     static private GraphBuffer getBufferByName(String name){
