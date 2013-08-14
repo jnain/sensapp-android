@@ -4,9 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.net.Uri;
-import org.sensapp.android.sensappdroid.preferences.GeneralPrefFragment;
 import org.sensapp.android.sensappdroid.restrequests.PutMeasuresTask;
-import org.sensapp.android.sensappdroid.websocket.WsRequest;
 
 /**
  * Created with IntelliJ IDEA.
@@ -16,11 +14,11 @@ import org.sensapp.android.sensappdroid.websocket.WsRequest;
  */
 public class PutMeasures {
     public PutMeasures(SharedPreferences sharedPreferences, Resources resources, Context context, Uri data){
-        if(GeneralPrefFragment.buildUri(sharedPreferences, resources).contains("ws://")){
+        /*if(GeneralPrefFragment.buildUri(sharedPreferences, resources).contains("ws://")){
             WsRequest.putData(context, data);
         }
-        else{
-            new PutMeasuresTask(context, data).execute();
-        }
+        else{*/
+        new PutMeasuresTask(context, data).execute();
+        //}
     }
 }

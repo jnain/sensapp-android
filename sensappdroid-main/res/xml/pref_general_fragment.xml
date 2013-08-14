@@ -23,17 +23,31 @@
     
         <org.sensapp.android.sensappdroid.preferences.EditTextServerPreference 
             android:key="@string/pref_default_server_key"
-            android:title="Default server"
-            android:dialogTitle="Set the default SensApp server"
-            android:summary="Set the default SensApp server"
+            android:title="HTTP server"
+            android:dialogTitle="Set the HTTP SensApp server"
+            android:summary="Set the HTTP SensApp server"
             android:defaultValue="@string/pref_server_default_value"/>
     
-    <EditTextPreference
+        <EditTextPreference
                 android:key="@string/pref_default_port_key"
-                android:title="Default port"
-                android:dialogTitle="Enter the default server port"
+                android:title="HTTP port"
+                android:dialogTitle="Enter the HTTP server port"
                 android:numeric="integer"
                 android:defaultValue="80" />
+
+        <org.sensapp.android.sensappdroid.preferences.EditTextServerPreference
+                android:key="@string/pref_ws_server_key"
+                android:title="WS server"
+                android:dialogTitle="Set the WS SensApp server"
+                android:summary="Set the WS SensApp server"
+                android:defaultValue="@string/pref_server_ws_value"/>
+
+        <EditTextPreference
+                android:key="@string/pref_ws_port_key"
+                android:title="WS port"
+                android:dialogTitle="Enter the WS server port"
+                android:numeric="integer"
+                android:defaultValue="9000" />
 
     </PreferenceCategory>
 </PreferenceScreen>

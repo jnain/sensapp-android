@@ -62,7 +62,7 @@ public class TabsActivity extends FragmentActivity implements OnCompositeSelecte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        String serverUrl = GeneralPrefFragment.buildUri(PreferenceManager.getDefaultSharedPreferences(this), getResources());
+        String serverUrl = GeneralPrefFragment.buildWsUri(PreferenceManager.getDefaultSharedPreferences(this), getResources());
         if(serverUrl.contains("ws://")){
             mClient = new WsClient(URI.create(serverUrl), new Draft_17());
             mClient.connect();

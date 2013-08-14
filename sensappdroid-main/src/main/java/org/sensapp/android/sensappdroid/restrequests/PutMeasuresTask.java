@@ -37,10 +37,15 @@ import org.sensapp.android.sensappdroid.json.MeasureJsonModel;
 import org.sensapp.android.sensappdroid.json.NumericalMeasureJsonModel;
 import org.sensapp.android.sensappdroid.json.StringMeasureJsonModel;
 import org.sensapp.android.sensappdroid.models.Sensor;
+import org.sensapp.android.sensappdroid.preferences.AutoUploadSensorDialog;
 import org.sensapp.android.sensappdroid.preferences.GeneralPrefFragment;
+import org.sensapp.android.sensappdroid.request.PostComposite;
+import org.sensapp.android.sensappdroid.websocket.WsRequest;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 public class PutMeasuresTask extends AsyncTask<Integer, Integer, Integer> {
@@ -137,6 +142,8 @@ public class PutMeasuresTask extends AsyncTask<Integer, Integer, Integer> {
 
 	@Override
 	protected Integer doInBackground(Integer... params) {
+        final Set<String> uploadWS = PreferenceManager.getDefaultSharedPreferences(context)
+                .getStringSet(AutoUploadSensorDialog.WS_UPLOAD, new HashSet<String>());
 
 		int rowTotal = 0;
 
@@ -157,6 +164,19 @@ public class PutMeasuresTask extends AsyncTask<Integer, Integer, Integer> {
 		if (params.length > 0) {
 			sizeLimit = params[0];
 		}
+
+        Cursor composites = context.getContentResolver().query(SensAppContract.Composite.CONTENT_URI, null, null, null, null);
+        String compositeNames[] = new String[composites.getCount()];
+        composites.moveToFirst();
+
+        for(int i=0; i<composites.getCount(); i++){
+            compositeNames[i] = composites.getString(composites.getColumnIndex(SensAppContract.Composite.NAME));
+            composites.moveToNext();
+        }
+
+        for(String name : compositeNames)
+            new PostComposite(PreferenceManager.getDefaultSharedPreferences(context),
+                    context.getResources(), context, name);
 
 		ArrayList<String> sensorNames = new ArrayList<String>();
 		cursor = context.getContentResolver().query(uri, new String[]{"DISTINCT " + SensAppContract.Measure.SENSOR}, SensAppContract.Measure.UPLOADED + " = 0", null, null);
@@ -187,25 +207,30 @@ public class PutMeasuresTask extends AsyncTask<Integer, Integer, Integer> {
 
 			sensor = DatabaseRequest.SensorRQ.getSensor(context, sensorName);
 
-			try {
-				if (!RestRequest.isSensorRegistered(sensor)) {
-					Uri postSensorResult = null;
-					try {
-						postSensorResult = new PostSensorRestTask(context, sensorName).executeOnExecutor(THREAD_POOL_EXECUTOR).get();
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					} catch (ExecutionException e) {
-						e.printStackTrace();
-					}
-					if (postSensorResult == null) {
-						return null;
-					}
-				}
-			} catch (RequestErrorException e1) {
-				errorMessage = e1.getMessage();
-				Log.e(TAG, errorMessage);
-				return null;
-			}
+            if(uploadWS.contains(sensor.getName())){
+                if(!WsRequest.isSensorRegistered(sensor))
+                    WsRequest.postSensor(sensor);
+            } else {
+                try {
+                    if (!RestRequest.isSensorRegistered(sensor)) {
+                        Uri postSensorResult = null;
+                        try {
+                            postSensorResult = new PostSensorRestTask(context, sensorName).executeOnExecutor(THREAD_POOL_EXECUTOR).get();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        } catch (ExecutionException e) {
+                            e.printStackTrace();
+                        }
+                        if (postSensorResult == null) {
+                            return null;
+                        }
+                    }
+                } catch (RequestErrorException e1) {
+                    errorMessage = e1.getMessage();
+                    Log.e(TAG, errorMessage);
+                    return null;
+                }
+            }
 
 			MeasureJsonModel model = null;
 			if ("Numerical".equals(sensor.getTemplate())) {
@@ -247,15 +272,19 @@ public class PutMeasuresTask extends AsyncTask<Integer, Integer, Integer> {
 								}
 							}
 
-							try {
-								RestRequest.putData(sensor.getUri(), JsonPrinter.measuresToJson(model));
-							} catch (RequestErrorException e) {
-								errorMessage = e.getMessage();
-								cursor.close();
-								return null;
-							}
-							model.clearValues();
-							publishProgress((int) ((float) (progress + ids.size()) / rowTotal * 100));
+                            if(uploadWS.contains(sensor.getName())){
+                                TabsActivity.getClient().send("registerData("+ JsonPrinter.measuresToJson(model) +")");
+                            } else {
+                                try {
+                                    RestRequest.putData(sensor.getUri(), JsonPrinter.measuresToJson(model));
+                                } catch (RequestErrorException e) {
+                                    errorMessage = e.getMessage();
+                                    cursor.close();
+                                    return null;
+                                }
+                                model.clearValues();
+                                publishProgress((int) ((float) (progress + ids.size()) / rowTotal * 100));
+                            }
 						}
 						ContentValues values = new ContentValues();
 						values.put(SensAppContract.Measure.UPLOADED, 1);

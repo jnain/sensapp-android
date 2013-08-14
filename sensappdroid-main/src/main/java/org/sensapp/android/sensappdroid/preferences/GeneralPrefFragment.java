@@ -27,18 +27,24 @@ import org.sensapp.android.sensappdroid.activities.TabsActivity;
 public class GeneralPrefFragment extends PreferenceFragment {
 	
 	private SharedPreferences preferences;
-	private EditTextServerPreference server;
-	private EditTextPreference port;
+	private EditTextServerPreference serverHttp;
+	private EditTextPreference portHttp;
+    private EditTextServerPreference serverWs;
+    private EditTextPreference portWs;
 	
 	private SharedPreferences.OnSharedPreferenceChangeListener spChanged = new SharedPreferences.OnSharedPreferenceChangeListener() {
 		@Override
 		public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {	
-			if (key.equals(server.getKey())) {
-				server.setSummary(sharedPreferences.getString(server.getKey(), ""));
-			} else if (key.equals(port.getKey())) {
-				port.setSummary(sharedPreferences.getString(port.getKey(), ""));
-			}
-            String url = sharedPreferences.getString(server.getKey(), "");
+			if (key.equals(serverHttp.getKey())) {
+				serverHttp.setSummary(sharedPreferences.getString(serverHttp.getKey(), ""));
+			} else if (key.equals(portHttp.getKey())) {
+				portHttp.setSummary(sharedPreferences.getString(portHttp.getKey(), ""));
+			} else if (key.equals(serverWs.getKey())) {
+                serverWs.setSummary(sharedPreferences.getString(serverWs.getKey(), ""));
+            } else if (key.equals(portWs.getKey())) {
+                portWs.setSummary(sharedPreferences.getString(portWs.getKey(), ""));
+            }
+            String url = sharedPreferences.getString(serverWs.getKey(), "");
             if(url.contains("ws://")){
                 if(TabsActivity.getClient().getConnected())
                     TabsActivity.getClient().close();
@@ -54,8 +60,10 @@ public class GeneralPrefFragment extends PreferenceFragment {
 		super.onCreate(savedInstanceState);
 		preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
 		addPreferencesFromResource(R.xml.pref_general_fragment);
-		server = (EditTextServerPreference) findPreference(getString(R.string.pref_default_server_key));
-		port = (EditTextPreference) findPreference(getString(R.string.pref_default_port_key));
+		serverHttp = (EditTextServerPreference) findPreference(getString(R.string.pref_default_server_key));
+		portHttp = (EditTextPreference) findPreference(getString(R.string.pref_default_port_key));
+        serverWs = (EditTextServerPreference) findPreference(getString(R.string.pref_ws_server_key));
+        portWs = (EditTextPreference) findPreference(getString(R.string.pref_ws_port_key));
 	}
 	
 	public static String buildUri(SharedPreferences preferences, Resources resources) throws IllegalStateException {
@@ -67,12 +75,23 @@ public class GeneralPrefFragment extends PreferenceFragment {
 		return server + ":" + port;
 	}
 
+    public static String buildWsUri(SharedPreferences preferences, Resources resources) throws IllegalStateException {
+        String server = preferences.getString(resources.getString(R.string.pref_ws_server_key), resources.getString(R.string.pref_server_ws_value));
+        String port = preferences.getString(resources.getString(R.string.pref_ws_port_key), "9000");
+        if (server.isEmpty() || port.isEmpty()) {
+            throw new IllegalStateException("Unable to read uri");
+        }
+        return server + ":" + port;
+    }
+
 	@Override
 	public void onResume() {
 		super.onResume();
 		preferences.registerOnSharedPreferenceChangeListener(spChanged);
-		server.setSummary(preferences.getString(server.getKey(), ""));
-		port.setSummary(preferences.getString(port.getKey(), ""));
+		serverHttp.setSummary(preferences.getString(serverHttp.getKey(), ""));
+		portHttp.setSummary(preferences.getString(portHttp.getKey(), ""));
+        serverWs.setSummary(preferences.getString(serverWs.getKey(), ""));
+        portWs.setSummary(preferences.getString(portWs.getKey(), ""));
 	}
 	
 	@Override

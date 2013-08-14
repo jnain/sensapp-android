@@ -70,7 +70,7 @@ public class ServerDataFragment extends ListFragment{
         //Cursor cursor = getActivity().getContentResolver().query(SensAppContract.Graph.CONTENT_URI, null, null, null, null);
         //adapter = new SimpleCursorAdapter(getActivity(), R.layout.graph_simple_row, cursor, new String[]{SensAppContract.Graph.TITLE}, new int[]{R.id.graph_name});
 
-        if(GeneralPrefFragment.buildUri(PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext()), getResources())
+        if(GeneralPrefFragment.buildWsUri(PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext()), getResources())
             .contains("ws://")) {
             displayComposites();
         }
@@ -142,7 +142,7 @@ public class ServerDataFragment extends ListFragment{
 		i.setData(uri);
 		switch (item.getItemId()) {
 		case R.id.server_data_switch:
-            if(GeneralPrefFragment.buildUri(PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext()), getResources())
+            if(GeneralPrefFragment.buildWsUri(PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext()), getResources())
                     .contains("ws://")){
                 if(DISPLAY.equals("Composites"))
                     displaySensors();
