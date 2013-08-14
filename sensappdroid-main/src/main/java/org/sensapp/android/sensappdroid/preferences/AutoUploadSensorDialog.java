@@ -102,8 +102,10 @@ public class AutoUploadSensorDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 		cursor = getActivity().getContentResolver().query(SensAppContract.Composite.CONTENT_URI, null, null, null, null);
-		final Set<String> autoUploadHTTP = PreferenceManager.getDefaultSharedPreferences(getActivity()).getStringSet(HTTP_UPLOAD, new HashSet<String>());
-        final Set<String> autoUploadWS = PreferenceManager.getDefaultSharedPreferences(getActivity()).getStringSet(WS_UPLOAD, new HashSet<String>());
+		final Set<String> autoUploadHTTP = new HashSet<String>();
+        autoUploadHTTP.addAll(PreferenceManager.getDefaultSharedPreferences(getActivity()).getStringSet(HTTP_UPLOAD, new HashSet<String>()));
+        final Set<String> autoUploadWS = new HashSet<String>();
+        autoUploadWS.addAll(PreferenceManager.getDefaultSharedPreferences(getActivity()).getStringSet(WS_UPLOAD, new HashSet<String>()));
 
         LinearLayout vList = new LinearLayout(this.getActivity());
         vList.setOrientation(LinearLayout.VERTICAL);
@@ -111,6 +113,21 @@ public class AutoUploadSensorDialog extends DialogFragment {
             String name = cursor.getString(cursor.getColumnIndexOrThrow(SensAppContract.Composite.NAME));
             vList.addView(new Composite(this.getActivity(), name, autoUploadHTTP, autoUploadWS).getMyLayout());
 		}
+
+        /* Add sensors not in any composite */
+        cursor = getActivity().getContentResolver().query(SensAppContract.Sensor.CONTENT_URI, null, null, null, null);
+        for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
+            String name = cursor.getString(cursor.getColumnIndexOrThrow(SensAppContract.Sensor.NAME));
+            boolean isDisplayed = false;
+            for(Sensor s: dialogItems){
+                if(s.getTextView().getText().toString().equals(name)){
+                    isDisplayed = true;
+                    break;
+                }
+            }
+            if(!isDisplayed)
+                vList.addView(new Sensor(this.getActivity(), name, autoUploadHTTP.contains(name), autoUploadWS.contains(name)).getMyView());
+        }
 
 		return new AlertDialog.Builder(getActivity())
 		.setTitle("Select sensors to auto upload")
