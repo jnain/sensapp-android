@@ -104,6 +104,7 @@ public class SensAppService extends Service implements PutMeasureCallback {
 		    new PutMeasures(PreferenceManager.getDefaultSharedPreferences(getApplicationContext()),
                     getResources(), getApplicationContext(), uri);
         }
+        new DeleteMeasuresTask(this, SensAppContract.Measure.CONTENT_URI).execute(SensAppContract.Measure.UPLOADED + " = 1");
 	}
 	
 	private void autoUpload() {
@@ -122,6 +123,7 @@ public class SensAppService extends Service implements PutMeasureCallback {
                             getResources(), getApplicationContext(), Uri.parse(SensAppContract.Measure.CONTENT_URI + "/" + name));
                 }
             }
+            new DeleteMeasuresTask(this, SensAppContract.Measure.CONTENT_URI).execute(SensAppContract.Measure.UPLOADED + " = 1");
         }
     }
 
@@ -150,6 +152,7 @@ public class SensAppService extends Service implements PutMeasureCallback {
                                 getResources(), getApplicationContext(), Uri.parse(SensAppContract.Measure.CONTENT_URI + "/" + name));
                     }
                 }
+                new DeleteMeasuresTask(this, SensAppContract.Measure.CONTENT_URI).execute(SensAppContract.Measure.UPLOADED + " = 1");
             }
             if(cursor.getCount() < amountData)
                 dataSent = false;
