@@ -56,9 +56,7 @@ public class AutoUploadSensorDialog extends DialogFragment {
             textView = (TextView)myView.findViewById(R.id.name);
             textView.setText(name);
             httpBox = (RadioButton)myView.findViewById(R.id.http);
-
             wsBox = (RadioButton)myView.findViewById(R.id.ws);
-
             noneBox = (RadioButton)myView.findViewById(R.id.none);
             if(http)
                 httpBox.setChecked(true);
@@ -104,18 +102,16 @@ public class AutoUploadSensorDialog extends DialogFragment {
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 		cursor = getActivity().getContentResolver().query(SensAppContract.Composite.CONTENT_URI, null, null, null, null);
-		String[] names = new String[cursor.getCount()];
 		final Set<String> autoUploadHTTP = PreferenceManager.getDefaultSharedPreferences(getActivity()).getStringSet(HTTP_UPLOAD, new HashSet<String>());
         final Set<String> autoUploadWS = PreferenceManager.getDefaultSharedPreferences(getActivity()).getStringSet(WS_UPLOAD, new HashSet<String>());
 
         LinearLayout vList = new LinearLayout(this.getActivity());
         vList.setOrientation(LinearLayout.VERTICAL);
         for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-			/*names[i] =*/
             String name = cursor.getString(cursor.getColumnIndexOrThrow(SensAppContract.Composite.NAME));
             vList.addView(new Composite(this.getActivity(), name, autoUploadHTTP, autoUploadWS).getMyLayout());
 		}
-        //final ArrayAdapter<String> namesAdapter = new ArrayAdapter<String>(this.getActivity(), R.layout.upload_composite, R.id.name, names);
+
 		return new AlertDialog.Builder(getActivity())
 		.setTitle("Select sensors to auto upload")
         .setView(vList)

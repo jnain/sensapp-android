@@ -190,6 +190,8 @@ public class WsRequest{
     }
 
     static public String postComposite(Context context, String compositeName){
+        if(isCompositeRegistered(context, compositeName))
+            return "none";
         try {
             ContentValues values = new ContentValues();
             values.put(SensAppContract.Composite.URI, GeneralPrefFragment.buildUri(PreferenceManager.getDefaultSharedPreferences(context), context.getResources()));

@@ -34,6 +34,7 @@ import org.sensapp.android.sensappdroid.request.PutMeasures;
 import org.sensapp.android.sensappdroid.restrequests.PutMeasuresTask.PutMeasureCallback;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -114,7 +115,8 @@ public class SensAppService extends Service implements PutMeasureCallback {
         } else {
             waitForDataAuto = false;
 
-            Set<String> names = PreferenceManager.getDefaultSharedPreferences(this).getStringSet(AutoUploadSensorDialog.HTTP_UPLOAD, null);
+            Set<String> names = new HashSet<String>();
+            names.addAll(PreferenceManager.getDefaultSharedPreferences(this).getStringSet(AutoUploadSensorDialog.HTTP_UPLOAD, null));
             names.addAll(PreferenceManager.getDefaultSharedPreferences(this).getStringSet(AutoUploadSensorDialog.WS_UPLOAD, null));
             if (names != null && !names.isEmpty()) {
                 for (final String name : names) {
@@ -143,7 +145,8 @@ public class SensAppService extends Service implements PutMeasureCallback {
                         getResources(), getApplicationContext(), SensAppContract.Measure.CONTENT_URI);
                 new DeleteMeasuresTask(this, SensAppContract.Measure.CONTENT_URI).execute(SensAppContract.Measure.UPLOADED + " = 1");*/
 
-                Set<String> names = PreferenceManager.getDefaultSharedPreferences(this).getStringSet(AutoUploadSensorDialog.HTTP_UPLOAD, null);
+                Set<String> names = new HashSet<String>();
+                names.addAll(PreferenceManager.getDefaultSharedPreferences(this).getStringSet(AutoUploadSensorDialog.HTTP_UPLOAD, null));
                 names.addAll(PreferenceManager.getDefaultSharedPreferences(this).getStringSet(AutoUploadSensorDialog.WS_UPLOAD, null));
                 if (names != null && !names.isEmpty()) {
                     for (final String name : names) {

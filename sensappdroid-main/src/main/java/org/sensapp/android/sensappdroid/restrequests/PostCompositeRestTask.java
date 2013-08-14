@@ -15,14 +15,6 @@
  */
 package org.sensapp.android.sensappdroid.restrequests;
 
-import java.util.concurrent.ExecutionException;
-
-import org.sensapp.android.sensappdroid.contract.SensAppContract;
-import org.sensapp.android.sensappdroid.datarequests.DatabaseRequest;
-import org.sensapp.android.sensappdroid.models.Composite;
-import org.sensapp.android.sensappdroid.models.Sensor;
-import org.sensapp.android.sensappdroid.preferences.GeneralPrefFragment;
-
 import android.content.ContentValues;
 import android.content.Context;
 import android.net.Uri;
@@ -30,6 +22,13 @@ import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
+import org.sensapp.android.sensappdroid.contract.SensAppContract;
+import org.sensapp.android.sensappdroid.datarequests.DatabaseRequest;
+import org.sensapp.android.sensappdroid.models.Composite;
+import org.sensapp.android.sensappdroid.models.Sensor;
+import org.sensapp.android.sensappdroid.preferences.GeneralPrefFragment;
+
+import java.util.concurrent.ExecutionException;
 
 public class PostCompositeRestTask extends AsyncTask<Void, Void, Uri> {
 	
@@ -94,7 +93,15 @@ public class PostCompositeRestTask extends AsyncTask<Void, Void, Uri> {
 			}
 		}
 		String response = null;
-		try {
+
+        try {
+            if(RestRequest.isCompositeRegistered(composite))
+                return null;
+        } catch (RequestErrorException e) {
+            e.printStackTrace();
+        }
+
+        try {
 			response = RestRequest.postComposite(composite);
 		} catch (RequestErrorException e) {
 			errorMessage = e.getMessage();
